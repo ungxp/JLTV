@@ -3,29 +3,13 @@
     <div class="distribution">
         <p class="txtDistribution">订单分布</p>
         <p class="enDistribution">Order Distribution</p>
-        <div class="car1">
-            <img src="../../assets/images/car1.png" alt="汽车1" class="carImg">
-            <p class="num">35200</p>
-            <p class="orderNum">订单数量</p>
-            <p class="type">供货类型—轻卡</p>
-        </div>
-        <div class="car2">
-            <img src="../../assets/images/car2.png" alt="汽车2" class="carImg">
-            <p class="num">35200</p>
-            <p class="orderNum">订单数量</p>
-            <p class="type">供货类型—轻客</p>
-        </div>
-        <div class="car3">
-            <img src="../../assets/images/car3.png" alt="汽车3" class="carImg">
-            <p class="num">35200</p>
-            <p class="orderNum">订单数量</p>
-            <p class="type">供货类型—SUV</p>
-        </div>
-        <div class="car4">
-            <img src="../../assets/images/car4.png" alt="汽车4" class="carImg">
-            <p class="num">35200</p>
-            <p class="orderNum">订单数量</p>
-            <p class="type">供货类型—皮卡</p>
+        <div class="order">
+          <div class="car" v-for="(item,index) in orderDistribution" :key="index">
+              <img :src="'data:image/png;base64,'+item.图片" alt="汽车" class="carImg">
+              <p class="num">{{item.数量}}</p>
+              <p class="orderNum">订单数量</p>
+              <p class="type">供货类型—{{item.系列名称}}</p>
+          </div>
         </div>
     </div>
     <div class="trend">
@@ -41,21 +25,25 @@
           <div class="swiper-wrapper">
               <div class="swiper-slide" v-for="(page,index) in pages" :key="index">
                 <ul>
-                  <li class="progressItem" v-for="item in page" :key="item.id" :style="'top:'+top(item.id)+'rem'">
-                    <p class="orderId">订单编号：</p><br><p class="orderId1">JD201904060547</p>
-                    <p class="productId">产品编号：</p><br><p class="productId1">JMC1070P8W-B-1</p>
+                  <li class="progressItem" v-for="(item,key) in page" :key="key" >
+                    <p class="orderId">订单编号：</p><br><p class="orderId1">{{item.订单编号}}</p>
+                    <p class="productId">产品编号：</p><br><p class="productId1">{{item.产品编号}}</p>
                     <div class="verticalLine2"></div>
-                    <i class="iconfont" :class="item.iconName"></i>
-                    <p :class="item.productName">{{item.prodectNum}}</p>
-                    <div class="barBig"></div>
-                    <div class="barSmall"></div>
-                    <p class="barNum">8500</p>
-                    <p class="barProgress">(50%)</p>
-                    <p class="min">0</p>
-                    <p class="max">17000</p>
+                    <!-- <i class="iconfont" :class="item.iconName"></i> -->
+                    <p :class="color(item.差异数)">{{Math.abs(item.差异数)}}</p>
+                    <div class="barBig">
+                      <div class="barSmall" :style="'width:'+(item.完成率*1).toFixed(1)*4.2+'rem'"></div>
+                      <p class="min">0</p>
+                      <p class="max">{{item.计划数}}</p>
+                      <p class="barNum">{{item.完工数 == null? 0 : item.完工数}}({{(item.完成率*100).toFixed(1)}}%)</p>
+                      <p class="startTime">{{item.计划开始时间|time}}</p>
+                      <p class="endTime">{{item.计划结束时间|time}}</p>
+                    </div>
+                    <!-- <p class="barProgress"></p> -->
                     <img src="../../assets/images/scale.png" alt="刻度" class="scale">
-                    <p class="startTime">2019/04/05</p>
-                    <p class="endTime">2019/05/05</p>
+                    <img src="../../assets/images/up.png" alt="上升" class="nameGreen"  v-if="item.差异数>0">
+                    <img src="../../assets/images/down.png" alt="下降" class="nameRed"  v-if="item.差异数<0">
+                    <img src="../../assets/images/flat.png" alt="持平" class="nameGray"  v-if="item.差异数==0">
                   </li>
                 </ul>
               </div>
@@ -67,90 +55,73 @@
     <div class="level"></div>
 </div>
 </template>
-<script>
+<script>      
+
 import echarts from 'echarts'
 import Swiper from 'swiper'
+import { constants } from 'fs';
 export default {
     data(){
       return{
-        progress:[
-          {
-            id:1,
-            prodectNum:358,
-            productName:'nameRed',
-            iconName:'icon-xiajiang1'
-          },
-          {
-            id:2,
-            prodectNum:158,
-            productName:'nameGreen',
-            iconName:'icon-shangsheng1'
-          },
-          {
-            id:3,
-            prodectNum:128,
-            productName:'nameRed',
-            iconName:'icon-xiajiang1'
-          },
-          {
-            id:4,
-            prodectNum:0,
-            productName:'nameGray',
-            iconName:'icon-zuoyousuofang'
-          },
-          {
-            id:5,
-            prodectNum:158,
-            productName:'nameGreen',
-            iconName:'icon-shangsheng1'
-          },
-          {
-            id:6,
-            prodectNum:128,
-            productName:'nameRed',
-            iconName:'icon-xiajiang1'
-          },
-          {
-            id:7,
-            prodectNum:158,
-            productName:'nameGreen',
-            iconName:'icon-shangsheng1'
-          },
-          {
-            id:8,
-            prodectNum:158,
-            productName:'nameGreen',
-            iconName:'icon-shangsheng1'
-          },
-          {
-            id:9,
-            prodectNum:0,
-            productName:'nameGray',
-            iconName:'icon-zuoyousuofang'
-          },
-          {
-            id:10,
-            prodectNum:128,
-            productName:'nameRed',
-            iconName:'icon-xiajiang1'
-          },
-          {
-            id:11,
-            prodectNum:158,
-            productName:'nameGreen',
-            iconName:'icon-shangsheng1'
-          },
-          {
-            id:12,
-            prodectNum:128,
-            productName:'nameRed',
-            iconName:'icon-xiajiang1'
-          },
-        ]
+        progress:[],
+        chart:[],
+        orderDistribution:[],
+        swiper0:''
       }
     },
     methods:{
-        initChart(){
+        color(data){
+          if(data>0){
+            return 'shangsheng'
+          }else if(data<0){
+            return 'xiajiang'
+          }else{
+            return 'zuoyousuofang'
+          }
+        },
+        getOrderDistribution(url1,url2,url3){
+            this.$axios.post(url1).then(res => {//获取订单完工情况（用于生产看板-生产进度跟踪）
+              // console.log(res)
+              // this.progress=[]
+              this.progress=res.data
+              this.$nextTick(() => {//滚动效果
+                if(this.swiper0) {
+                  this.swiper0.update(false)
+                }else {
+                  var myswiper = new Swiper('.swiper-container',{
+                    loop: true,
+                    autoplay: {
+                      delay: 2000,
+                      reverseDirection: false,
+                      disableOnInteraction:false
+                    },
+                    direction: 'vertical',
+                    observer:true,
+                    observeParents:true
+                  })
+                  this.swiper0 = myswiper
+                }
+                
+              })
+            })
+          
+          // console.log('dasd')
+          this.$axios.post(url2).then(res2=>{//取最近30天每天的完工数量合计（用于生产看板-产量走势）
+            var data=[]
+            var result=JSON.parse(res2.data)
+            result.forEach((item,index)=>{
+            data.push(item.数量)
+            })
+            this.initChart(data)
+            console.log(JSON.parse(res2.data))
+          })
+          this.$axios.post(url3).then(res3=>{//获取订单最近30天的计划数量合计，按车型系列统计（用于生产看板-订单分布）
+            // console.log(res3)
+            this.orderDistribution=res3.data
+          })
+          
+        },
+        initChart(data){
             this.chart = echarts.init(this.$refs.myEchart)
             this.chart.setOption({
                 xAxis: {
@@ -162,9 +133,9 @@ export default {
                     axisLine: {
                         show: true,
                         lineStyle: {
-                            color: '#294a88',
-                            opacity: 0.2,
-                            width: 2,
+                            color: '#fff',
+                            opacity: 0.4,
+                            width: 1,
                             type:'solid'
                         }
                     },
@@ -181,39 +152,30 @@ export default {
                     max: 2000,
                     interval: 500,
                     axisTick : {show: false},
-                    axisLine: {
-                        show: false,
-                        lineStyle: {
-                            color: '#fff',
-                            opacity:0.2
-                        }
-                    },
-                    axisLabel: {
-                        fontSize:'45%',
-                        textStyle: {
-                            color: '#fff'
-                        }
-                    },
-                    splitLine: {
-                        show: true,
-                        lineStyle: {
-                            color: '#294a88',
-                            opacity:0.2,
-                            width: 2
-                        }
-                    },
-                    axisLine: {
-                      show: true,
-                      lineStyle: {
-                            color: '#294a88',
-                            opacity: 0.5,
-                            width: 2,
-                            type:'solid'
-                      }
-                    }
+                        axisLine: {
+                            show: false,
+                            lineStyle: {
+                                color: '#fff',
+                                opacity:0.4
+                            }
+                        },
+                        axisLabel: {
+                            fontSize:'45%',
+                            textStyle: {
+                                color: '#fff'
+                            }
+                        },
+                        splitLine: {
+                            show: true,
+                            lineStyle: {
+                                color: '#fff',
+                                opacity:0.4
+                            }
+                        },
+                    // nameGap: 30,
                 },
                 series: [{
-                    data: [500, 650, 500, 600, 300, 700, 500, 700, 530, 720, 800, 1010, 1230, 1000, 800, 700, 600, 750, 600, 550, 800, 700, 780, 900, 800, 900, 1000, 1100, 1000, 1300],
+                    data:data,
                     type: 'line',
                     symbol: 'square',
                     symbolSize: 6,
@@ -224,10 +186,17 @@ export default {
                             type: 'solid'
                         }
                     },
+                    splitLine: {
+                        show: true,
+                        lineStyle:{
+                            color: ['#ccc'],
+                            width: 1,
+                            opacity:0.01,
+                            type: 'solid'
+                        }
+                    },
                     itemStyle: {
                         normal: {
-                            // borderWidth: 3,
-                            // borderColor: 'yellow',
                             color: 'white'
                         }
                     }
@@ -235,58 +204,29 @@ export default {
             })
             
         },
-        top(i){
-          let top=0
-          if((i)%6==1){
-            top=0
-          }
-          else if((i)%6==2){
-            top=1.65
-          }
-          else if((i)%6==3){
-            top=3.3
-          }
-          else if((i)%6==4){
-            top=4.95
-          }
-          else if((i)%6==5){
-            top=6.6
-          }
-          else if((i)%6==0){
-            top=8.25
-          }
-          return top
-        },
-        
     },
+    // updated(){
+
+    // },
     mounted(){
-        window.requestAnimationFrame(() => {//在下次重绘之前调用指定的回调函数更新动画，如果没有这句话，刷新时会获取不到div的宽高
-          // init echats etc..
-          // console.log(11)
-          this.initChart()
-          new Swiper ('.swiper-container', {
-              autoplay: {
-                delay: 3000,
-                stopOnLastSlide: false,
-                disableOnInteraction: true,
-                },
-              direction: 'vertical', // 垂直切换选项
-              loop: true, // 循环模式选项
-          }) 
-          // this.pages() 
-        })
-        
-        const that = this
-        window.addEventListener("resize", function () {
-            that.chart.resize()
-        });
-             
+      const that = this
+      this.getOrderDistribution('/Mcorder/GetProductionProgress','/Mcbarcode/GetProductionTrend','/Mcorder/GetOrderDistribution')
+      var timer1 = window.setInterval(()=>{
+        that.getOrderDistribution('/Mcorder/GetProductionProgress','/Mcbarcode/GetProductionTrend','/Mcorder/GetOrderDistribution')
+      }, 60000);
+      window.requestAnimationFrame(() => {//在下次重绘之前调用指定的回调函数更新动画，如果没有这句话，刷新时会获取不到div的宽高
+        this.initChart()
+      })
+      window.addEventListener("resize", function () {
+          that.chart.resize()
+      });
     },
     computed:{
       pages(){
           const pages=[]
           this.progress.forEach((item,index)=>{
             const page=Math.floor(index/6)
+            item.差异数==null?item.差异数=0:item.差异数=item.差异数
             if(!pages[page]){
               pages[page]=[]
             }
@@ -296,7 +236,6 @@ export default {
         }
     }
 }
-
 </script>
 <style scoped lang='stylus' rel='stylesheet/stylus'>
 .big
@@ -344,146 +283,53 @@ export default {
       top .49rem
       font-family 'PingFang-SC-Medium'
       font-weight 500
-    .car1
-      width 4.27rem
-      height 2.95rem
-      position absolute
-      left .4rem
-      top .97rem
-      background rgba(5,53,153,0.18)
-      .carImg
-        position absolute
-        left .08rem
-        top .96rem
-      .num
-        font-size .31rem
-        color #fff
-        font-weight 500
-        position absolute
-        left 2.36rem
-        top .28rem
-        font-family 'PingFang-SC-Medium'
-      .orderNum
-        font-size .15rem
-        color rgba(198,213,253,1)
-        font-weight 500
-        position absolute
-        left 3.3rem
-        top .39rem
-        font-family 'PingFang-SC-Medium'
-      .type
-        font-size .22rem
-        color rgba(198,213,253,1)
-        font-weight 500
-        position absolute
-        left 2.36rem
-        top .64rem
-        font-family 'PingFang-SC-Medium'
-    .car2
-      width 4.27rem
-      height 2.95rem
-      position absolute
-      left 4.88rem
-      top .97rem
-      background rgba(5,53,153,0.18)
-      .carImg
-        position absolute
-        left .08rem
-        top .96rem
-      .num
-        font-size .31rem
-        color #fff
-        font-weight 500
-        position absolute
-        left 2.36rem
-        top .28rem
-        font-family 'PingFang-SC-Medium'
-      .orderNum
-        font-size .15rem
-        color rgba(198,213,253,1)
-        font-weight 500
-        position absolute
-        left 3.3rem
-        top .39rem
-        font-family 'PingFang-SC-Medium'
-      .type
-        font-size .22rem
-        color rgba(198,213,253,1)
-        font-weight 500
-        position absolute
-        left 2.36rem
-        top .64rem
-        font-family 'PingFang-SC-Medium'
-    .car3
-      width 4.27rem
-      height 2.95rem
-      position absolute
-      left .4rem
-      top 4.14rem
-      background rgba(5,53,153,0.18)
-      .carImg
-        position absolute
-        left .08rem
-        top .96rem
-      .num
-        font-size .31rem
-        color #fff
-        font-weight 500
-        position absolute
-        left 2.36rem
-        top .28rem
-        font-family 'PingFang-SC-Medium'
-      .orderNum
-        font-size .15rem
-        color rgba(198,213,253,1)
-        font-weight 500
-        position absolute
-        left 3.3rem
-        top .39rem
-        font-family 'PingFang-SC-Medium'
-      .type
-        font-size .22rem
-        color rgba(198,213,253,1)
-        font-weight 500
-        position absolute
-        left 2.36rem
-        top .64rem
-        font-family 'PingFang-SC-Medium'
-    .car4
-      width 4.27rem
-      height 2.95rem
-      position absolute
-      left 4.88rem
-      top 4.14rem
-      background rgba(5,53,153,0.18)
-      .carImg
-        position absolute
-        left .08rem
-        top .96rem
-      .num
-        font-size .31rem
-        color #fff
-        font-weight 500
-        position absolute
-        left 2.36rem
-        top .28rem
-        font-family 'PingFang-SC-Medium'
-      .orderNum
-        font-size .15rem
-        color rgba(198,213,253,1)
-        font-weight 500
-        position absolute
-        left 3.3rem
-        top .39rem
-        font-family 'PingFang-SC-Medium'
-      .type
-        font-size .22rem
-        color rgba(198,213,253,1)
-        font-weight 500
-        position absolute
-        left 2.36rem
-        top .64rem
-        font-family 'PingFang-SC-Medium'
+    .order
+      width 9.59rem
+      height 6.85rem
+      margin-top .63rem
+      padding-left .19rem
+      padding-right .4rem
+      padding-top .12rem
+      padding-bottom .39rem
+      .car
+        display inline-block
+        float left
+        position relative
+        width 4.27rem
+        height 2.95rem
+        margin-left .21rem
+        margin-top .22rem
+        background rgba(5,53,153,0.18)
+        .carImg
+          position absolute
+          left .08rem
+          top .96rem
+          width 3.44rem
+          height 1.92rem
+        .num
+          font-size .31rem
+          color #fff
+          font-weight 500
+          position absolute
+          right .97rem
+          top .28rem
+          font-family 'PingFang-SC-Medium'
+        .orderNum
+          font-size .15rem
+          color rgba(198,213,253,1)
+          font-weight 500
+          position absolute
+          left 3.3rem
+          top .39rem
+          font-family 'PingFang-SC-Medium'
+        .type
+          font-size .22rem
+          color rgba(198,213,253,1)
+          font-weight 500
+          position absolute
+          right .32rem
+          top .64rem
+          font-family 'PingFang-SC-Medium'
   .trend
     width 9.59rem
     height 3.31rem
@@ -552,12 +398,13 @@ export default {
           width 9rem
           height 9.55rem
           .progressItem
-            position absolute
+            position relative
             left .48rem
-            top .96rem
+            top 0
             width 8.64rem
             height 1.34rem
             background rgba(5,53,153,.18)
+            margin-bottom .3rem
             .orderId
               position absolute
               left .27rem
@@ -602,107 +449,98 @@ export default {
               position absolute
               left 2.3rem
               top .22rem
-            .icon-xiajiang1
+            .xiajiang
               font-size .29rem
+              width .15rem
+              height .29rem
+              font-weight 400
               color red
               position absolute
-              left 2.67rem
+              left 3rem
               top .49rem
-            .icon-shangsheng1
+            .shangsheng
               font-size .29rem
+              width .15rem
+              height .29rem
               color #80C635
               position absolute
-              left 2.67rem
+              font-weight 400
+              left 3rem
               top .49rem
-            .icon-zuoyousuofang
-              width .15rem
+            .zuoyousuofang
+              width .37rem
+              height .15rem
+              font-weight 400
               font-size .37rem
               color #63BBC9
               position absolute
-              left 2.67rem
-              top .49rem
+              left 3.1rem
+              top .45rem
             .nameRed
               position absolute
-              left 2.93rem
-              top .53rem
-              font-weight 400
-              font-size .28rem
-              color rgba(255,0,54,1)
+              left 2.67rem
+              top .52rem
             .nameGreen
               position absolute
-              left 2.93rem
-              top .53rem
-              font-weight 400
-              font-size .28rem
-              color rgba(26,250,41,1)
+              left 2.67rem
+              top .52rem
             .nameGray
               position absolute
-              left 3.21rem
-              top .53rem
-              font-weight 400
-              font-size .28rem
-              color rgba(99,187,201,1)
+              left 2.6rem
+              top .56rem
             .barBig
               width 4.2rem
               height .27rem
               background rgba(226,231,238,.2)
-              position absolute
+              position relative
               left 3.82rem
-              top .44rem
-            .barSmall
-              width 2.2rem
-              height .27rem
-              background linear-gradient(0deg,rgba(25,145,235,1) 0%,rgba(46,161,248,1) 100%)
-              border-radius .04rem 0 0 .04rem
-              position absolute
-              left 3.82rem
-              top .44rem
-            .barNum
-              font-size .19rem
-              color #fff
-              font-weight 400
-              position absolute
-              left 5.54rem
-              top .47rem
-            .barProgress
-              font-size .14rem
-              color #fff
-              font-weight 400
-              position absolute
-              left 6rem
-              top .52rem
-            .min
-              font-size .18rem
-              color rgba(198,213,253,1)
-              font-weight 400
-              position absolute
-              left 3.83rem
-              top .21rem
-            .max
-              font-size .18rem
-              color rgba(198,213,253,1)
-              font-weight 400
-              position absolute
-              left 7.54rem
-              top .21rem
+              top -.1rem
+              .barSmall
+                width 2.2rem
+                height .27rem
+                background linear-gradient(0deg,rgba(25,145,235,1) 0%,rgba(46,161,248,1) 100%)
+                border-radius .04rem 0 0 .04rem
+                position absolute
+                left 0
+                top 0
+              .barNum
+                font-size .19rem
+                color #fff
+                font-weight 400
+                line-height 0.27rem
+                text-align center
+              .min
+                font-size .18rem
+                color rgba(198,213,253,1)
+                font-weight 400
+                position absolute
+                left 0
+                top -.18rem
+              .max
+                font-size .18rem
+                color rgba(198,213,253,1)
+                font-weight 400
+                position absolute
+                right 0
+                top -.18rem
+              .startTime
+                font-size 16px
+                font-weight 500
+                color rgba(124,140,165,1)
+                position absolute
+                left 0
+                top .6rem
+              .endTime
+                font-size 16px
+                font-weight 500
+                color rgba(124,140,165,1)
+                position absolute
+                right 0
+                top .6rem
             .scale
               position absolute
               left 3.82rem
               bottom .43rem
               width 4.18rem
               height .1rem
-            .startTime
-              font-size 16px
-              font-weight 500
-              color rgba(124,140,165,1)
-              position absolute
-              left 3.39rem
-              top 1.03rem
-            .endTime
-              font-size 16px
-              font-weight 500
-              color rgba(124,140,165,1)
-              position absolute
-              left 7.52rem
-              top 1.03rem
 </style>

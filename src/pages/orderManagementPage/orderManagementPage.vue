@@ -2,7 +2,7 @@
     <div class="orderManagementBox">
         <div class="orderManagementBox-left">
             <div class="left-header">
-                <div class="orderTrack" @click="gotorealTimeStatusPage">
+                <div class="orderTrack">
                     <p>今日排产任务单跟踪</p>
                     <p>Today's scheduling</p>
                 </div>
@@ -17,23 +17,25 @@
                     <ul class="swiper-slide" v-for="(orderTrackListPage, index) in orderTrackListPages" :key="index">
                         <li v-for="(item, index) in orderTrackListPage" :key="index">
                             <div class="order-left">
-                                <span class="status"></span>
+                                <span class="status1" v-show="item.状态 == '未开始'"></span>
+                                <span class="status2" v-show="item.状态 == '进行中'"></span>
+                                <span class="status3" v-show="item.状态 == '已完成'"></span>
                                 <div>
-                                    <div>订单编号：<span>{{item.dd}}</span></div>
-                                    <div>排产单号：<span>{{item.pc}}</span></div>
-                                    <div>产品编号：<span>{{item.cp}}</span></div>
+                                    <div>订单编号：<span>{{item.订单编号}}</span></div>
+                                    <div>排产单号：<span>{{item.排产单号}}</span></div>
+                                    <div>产品编号：<span>{{item.产品编号}}</span></div>
                                 </div>
                             </div>
                             <div class="order-middle"></div>
                             <div class="order-right">
                                 <div class="order-right-top">
-                                    <div :style="{'width':`${item.count/17000*5.23}rem`}">
-                                        <div class="percent"><span>{{item.count}}</span><span>({{Math.round(item.count/17000*100)}}%)</span></div>
+                                    <div :style="{'width':`${item.完成率 <= 1?item.完成率*5.23:5.23}rem`}">
+                                        <div class="percent"><span>{{item.完成数量}}</span><span>({{parseInt(item.完成率*100)}}%)</span></div>
                                     </div>
                                 </div>
                                 <div class="order-right-bottom">
                                     <span>0</span>
-                                    <span>17000</span>
+                                    <span>{{item.计划数量}}</span>
                                 </div>
                             </div>
                         </li>
@@ -62,12 +64,18 @@
                     <div class="swiper-wrapper">
                         <ul class="swiper-slide" v-for="(UnfinishedOrdersPage, index) in UnfinishedOrdersPages" :key="index">
                             <li v-for="(item, index) in UnfinishedOrdersPage" :key="index">
-                                <span>{{item.jd}}</span>
-                                <span>{{item.pc}}</span>
-                                <span>{{item.count}}</span>
-                                <span>{{item.finish}}</span>
-                                <span>{{item.cj}}</span>
-                                <span>{{item.time}}</span>
+                                <!-- <span>{{item.订单号}}</span>
+                                <span>{{item.产品编号}}</span>
+                                <span>{{item.订单数量}}</span>
+                                <span>{{item.实际完成}}</span>
+                                <span>{{item.差距}}</span>
+                                <span>{{item.计划结束日期}}</span> -->
+                                <span>{{item.订单号}}</span>
+                                <span>{{item.产品编号}}</span>
+                                <span>{{item.订单数量}}</span>
+                                <span>{{item.实际完成 == null? '0': item.实际完成}}</span>
+                                <span>{{item.差距 == null? '0': item.差距}}</span>
+                                <span>{{item.计划结束日期.substring(0,10)}}</span>
                             </li>
                         </ul>
                     </div>
@@ -83,65 +91,16 @@ import Swiper from 'swiper'
         data() {
             return {
                 //今日排产任务单跟踪列表
-                orderTrackList: [
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 9800},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 6500},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 15500},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 8500},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 9800},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 9800},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 9800},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 6500},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 15500},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 8500},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 9800},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 9800},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 9800},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 6500},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 15500},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 8500},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 9800},
-                    {dd:'JD201904060547', pc:'JX201904060547', cp:'JMC1070P8W-B3', count: 9800},
-                    ],
+                orderTrackList: [],
                 //未完成订单列表
-                UnfinishedOrders:[
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                    {jd:'JD12349876', pc:'PC040211', count:'2000', finish:'1950', cj:'50', time:'2019/04/08'},
-                ]
+                UnfinishedOrders:[],
+                //swiper0
+                swiper0: '',
+                //swiper1
+                swiper1: ''
             }
         },
         methods: {
-            gotorealTimeStatusPage() {
-                this.$router.push({name: 'realTimeStatusPage'})
-            }
         },
         computed: {
             //今日排产任务单跟踪列表页数
@@ -169,22 +128,82 @@ import Swiper from 'swiper'
                 return UnfinishedOrdersPages
             },
         },
-        mounted() {
-            new Swiper('.swiper-container0',{
-                loop: true,
-                autoplay: true,
-                delay: 3000,
-                observer:true,
-                observeParents:true
+        mounted() { 
+            //获取今日排产任务单数据
+            this.$axios.post('/Mcproductionschedule/GetTodayScheduling').then(res => {
+                    this.orderTrackList = JSON.parse(res.data)
+                    this.$nextTick(() => {
+                        if(this.swiper0) {
+                            this.swiper0.update(false)
+                            
+                        }else {
+                            var swiper0 = new Swiper('.swiper-container0',{
+                                loop: true,
+                                autoplay: true,
+                                delay: 3000,
+                                observer:true,
+                                observeParents:true
+                            })
+                            this.swiper0 = swiper0
+                        }
+                    })   
+                })
+            //获取未完成订单数据
+            this.$axios.post('/Mcorder/GetUnfinishedOrders').then(res => {
+                this.UnfinishedOrders = res.data
+                this.$nextTick(() => {
+                    if(this.swiper1) {
+                        this.swiper1.update(false)
+                    }else {
+                        var swiper1 = new Swiper('.swiper-container1',{
+                            loop: true,
+                            autoplay: true,
+                            delay: 3000,
+                            direction: 'vertical',
+                            observer:true,
+                            observeParents:true
+                        })
+                        this.swiper1 = swiper1
+                    }
+                })
             })
-            new Swiper('.swiper-container1',{
-                loop: true,
-                autoplay: true,
-                delay: 3000,
-                direction: 'vertical',
-                observer:true,
-                observeParents:true
-            })
+            setInterval(() => {
+                this.$axios.post('/Mcproductionschedule/GetTodayScheduling').then(res => {
+                    this.orderTrackList = JSON.parse(res.data)
+                    this.$nextTick(() => {
+                        if(this.swiper0) {
+                            this.swiper0.update(false) 
+                        }else {
+                            var swiper0 = new Swiper('.swiper-container0',{
+                                loop: true,
+                                autoplay: true,
+                                delay: 3000,
+                                observer:true,
+                                observeParents:true
+                            })
+                            this.swiper0 = swiper0
+                        }
+                    })
+                })
+                this.$axios.post('/Mcorder/GetUnfinishedOrders').then(res => {
+                    this.UnfinishedOrders = res.data
+                    this.$nextTick(() => {
+                        if(this.swiper1) {
+                            this.swiper1.update(false)
+                        }else {
+                            var swiper1 = new Swiper('.swiper-container1',{
+                                loop: true,
+                                autoplay: true,
+                                delay: 3000,
+                                direction: 'vertical',
+                                observer:true,
+                                observeParents:true
+                            })
+                            this.swiper1 = swiper1
+                        }
+                    })
+                })
+            },60000)
         }
     }
 </script>
@@ -252,14 +271,27 @@ import Swiper from 'swiper'
                             .order-left
                                 width 2.71rem
                                 float left
-                                .status 
+                                .status1 
+                                    float left
+                                    display inline-block
+                                    width .15rem
+                                    height .15rem
+                                    background linear-gradient(-28deg,rgba(192,192,170,1),rgba(55,241,255,1))
+                                    border-radius 50%
+                                .status2 
                                     float left
                                     display inline-block
                                     width .15rem
                                     height .15rem
                                     background linear-gradient(-28deg,rgba(253,200,48,1),rgba(243,115,53,1))
                                     border-radius 50%
-
+                                .status3 
+                                    float left
+                                    display inline-block
+                                    width .15rem
+                                    height .15rem
+                                    background linear-gradient(-28deg,rgba(86,204,242,1),rgba(47,128,237,1))
+                                    border-radius 50%
                                 div
                                     float right
                                     width 2.42rem
@@ -290,15 +322,15 @@ import Swiper from 'swiper'
                                         height 100%
                                         background linear-gradient(0deg,rgba(25,145,235,1) 0%,rgba(46,161,248,1) 100%)
                                         border-radius .02rem .04rem .04rem .02rem
-                                        position absolute
-                                        // top 0
-                                        // left 0
+                                        // position absolute
                                         .percent 
                                             background rgba(255, 255, 255, 0) 
                                             height .17rem
                                             position absolute 
-                                            right 0
-                                            // transform translateX(50%)  
+                                            left 50%
+                                            transform translateX(-50%) 
+                                            top 50%
+                                            transform translateY(-90%) 
                                             span 
                                                 color #ffffff
                                                 &:first-child

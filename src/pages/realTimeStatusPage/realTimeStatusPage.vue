@@ -14,9 +14,9 @@
                 <div class="title">设备状态<span>Equipment Status</span></div> 
                 <div class="echartTwo" ref="echartTwo"></div>
                 <ul class="status">
-                    <li><span class="statuslogo"></span><div><span>生产中</span><span>Normal</span></div><span class="number">60</span></li>
-                    <li><span class="statuslogo"></span><div><span>未生产</span><span>No Start</span></div><span class="number">32</span></li>
-                    <li><span class="statuslogo"></span><div><span>故障中</span><span>Failure</span></div><span class="number">08</span></li>
+                    <li><span class="statuslogo"></span><div><span>生产中</span><span>Normal</span></div><span class="number">{{this.EquipmentNormal}}</span></li>
+                    <li><span class="statuslogo"></span><div><span>未生产</span><span>No Start</span></div><span class="number">{{this.EquipmentNo}}</span></li>
+                    <li><span class="statuslogo"></span><div><span>故障中</span><span>Failure</span></div><span class="number">{{EquipmentFailure}}</span></li>
                 </ul>   
             </div>
             <div class="realTimeStatu">
@@ -25,18 +25,18 @@
                     <div class="swiper-wrapper">
                         <ul class="swiper-slide" v-for="(page, index) in PositionStatusPages" :key="index">
                             <li v-for="(item, index) in page" :key="index">
-                                <p>{{item.cx}}</p>
+                                <p>{{item.产线名称}}</p>
                                 <div class="bd"></div>
                                 <div class="bd"></div>
                                 <div class="shouldUp">
                                     <span>应上岗工位</span>
                                     <div class="totalMember"></div>
-                                    <span>{{item.su}}个</span>
+                                    <span>{{item.应上岗工位数}}个</span>
                                 </div>
                                 <div class="haveUp">
                                     <span>已上岗工位</span>
-                                    <div class="comeMember" :style="{'width': `${item.hu / item.su * 3.04}rem`}"></div>
-                                    <span>{{item.hu}}个</span>
+                                    <div class="comeMember" :style="{'width': `${item.已上岗工位数 / item.应上岗工位数 * 3.04}rem`}"></div>
+                                    <span>{{item.已上岗工位数}}个</span>
                                 </div>
                             </li>
                         </ul>
@@ -68,11 +68,11 @@
                         <div class="swiper-wrapper">
                             <ul class="swiper-slide" v-for="(page, index) in ProcessParametersPages" :key="index"> 
                                 <li v-for="(item, index) in page" :key="index">
-                                    <span>{{item.nb}}</span>
-                                    <span>{{item.nm}}</span>
-                                    <span>{{item.param}}</span>
-                                    <span>{{item.ll}}</span>
-                                    <span>{{item.sj}}</span>
+                                    <span>{{item.Code}}</span>
+                                    <span>{{item.Name}}</span>
+                                    <span>{{item.Parameter}}</span>
+                                    <span>{{item.Standard}}</span>
+                                    <span>{{item.Value}}</span>
                                 </li>
                             </ul>
                         </div>
@@ -82,44 +82,39 @@
         </div>
     </div>
 </template>
- 
 <script>
 import echarts from 'echarts'
 import Swiper from 'swiper'
-import { setTimeout } from 'timers';
+import { setTimeout, setInterval } from 'timers';
     export default {
         data() {
             return {
                 //模拟生产线岗位实时状态数据
-                positionStatus: [
-                    {cx:'产线A', su:300, hu: 90},
-                    {cx:'产线B', su:200, hu: 100},
-                    {cx:'产线c', su:500, hu: 200},
-                    {cx:'产线D', su:150, hu: 120},
-                    {cx:'产线E', su:300, hu: 110},
-                    {cx:'产线F', su:300, hu: 100},
-                    {cx:'产线G', su:400, hu: 180},
-                    {cx:'产线H', su:600, hu: 120},
-                    ],
+                positionStatus: [],
                 //模拟监控工艺参数
-                ProcessParameters:[
-                    {nb:'001-33', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-33', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-33', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-33', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-33', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-33', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-44', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-44', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-44', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-44', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-44', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-44', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-55', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-55', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-55', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    {nb:'001-55', nm:'后桥通过式超声波喷淋清洗机', param:'倍率', ll:'50%', sj:'100%'},
-                    ]
+                ProcessParameters:[],
+                //质量柏拉图名称数组
+                PlatoName:[],
+                //质量柏拉图数量
+                PlatoQuantity: [],
+                //质量柏拉图百分比
+                PlatoPercent: [],
+                //设备状态未生产
+                EquipmentNo:'',
+                //设备状态生产中
+                EquipmentNormal:'',
+                //设备状态故障中
+                EquipmentFailure: '',
+                //设备效率OEE&产能利用率TEEP过去一个月
+                History:[],
+                //设备效率OEE&产能利用率TEEP目标
+                Target:[],
+                //设备效率OEE&产能利用率TEEP实际
+                Reality:[],
+                //swiper0
+                swiper0: '',
+                //swiper1
+                swiper1: ''
             }
         },
         computed: {
@@ -150,7 +145,7 @@ import { setTimeout } from 'timers';
         },
         methods: {
             //初始化图表
-            initChart() {    
+            initChart1(History, Target, Reality) {    
                 //初始化图表一
                 this.echartOne = echarts.init(this.$refs.echartOne)
                 this.echartOne.setOption({
@@ -221,7 +216,7 @@ import { setTimeout } from 'timers';
                         {
                             type: 'bar',
                             barWidth : '12.5%',
-                            data: [78, 46],
+                            data: History,
                             barGap: '100%',
                             itemStyle: {
                                 normal: {
@@ -249,7 +244,7 @@ import { setTimeout } from 'timers';
                         {
                             type: 'bar',
                             barWidth : '12.5%',
-                            data: [67, 51],
+                            data: Target,
                             barGap: '100%',
                             itemStyle: {
                                 normal: {
@@ -278,7 +273,7 @@ import { setTimeout } from 'timers';
                         {
                             type: 'bar',
                             barWidth : '12.5%',
-                            data: [48, 32],
+                            data: Reality,
                             barGap: '100%',
                             itemStyle: {
                                 normal: {
@@ -306,7 +301,9 @@ import { setTimeout } from 'timers';
                         },
                         
                     ]
-                })
+                })   
+            },
+            initChart2(EquipmentNo, EquipmentNormal, EquipmentFailure){
                 //初始化图表二
                 this.echartTwo = echarts.init(this.$refs.echartTwo)
                 this.echartTwo.setOption({
@@ -318,9 +315,9 @@ import { setTimeout } from 'timers';
                             center: ['50%', '55%'],
                             avoidLabelOverlap: false,
                             data:[
-                                {value:60, name:'生产中'},
-                                {value:32, name:'未生产'},
-                                {value:8, name:'故障中'},
+                                {value:EquipmentNormal, name:'生产中'},
+                                {value:EquipmentNo, name:'未生产'},
+                                {value:EquipmentFailure, name:'故障中'},
                             ],
                             label: {
                                 normal: {
@@ -348,6 +345,8 @@ import { setTimeout } from 'timers';
                         }
                     ]
                 })
+            },
+            initChart3(PlatoName, PlatoQuantity, PlatoPercent){
                 //初始化图表三
                 this.echartThree = echarts.init(this.$refs.echartThree)
                 this.echartThree.setOption({
@@ -355,7 +354,7 @@ import { setTimeout } from 'timers';
                     xAxis: [
                         {
                             type: 'category',
-                            data: ['油封油封油封油封大萨达','气室','U型螺','气室支','U型','U型螺','U型','U型','U型螺','U型螺'],
+                            data: PlatoName,
                             axisTick : {
                                 show: false,
                                 alignWithLabel: true 
@@ -440,7 +439,7 @@ import { setTimeout } from 'timers';
                     series: [
                         {
                             type:'bar',
-                            data:[49, 37, 36, 35, 28, 18, 15, 10, 8, 7],
+                            data:PlatoQuantity,
                             barWidth: '80%',
                             barCategoryGap:'31.4%',
                             itemStyle: {
@@ -494,33 +493,20 @@ import { setTimeout } from 'timers';
                                     type: 'solid'
                                 }
                             },
-                            data:[60.5, 63.4, 64.5, 70.1, 76.5, 80.1, 81.3, 84.3, 89.6, 100]
+                            data:PlatoPercent
                         }
                     ]
                 })
-            }
+            },
         },
         mounted() {
-            // setTimeout(() => {
-            //     console.log(this.$refs.echartOne.style.webkitTapHighlightColor)
-            // },500)
+            const URL = this.$route.params.url
+            const WORKSHOP = this.$route.params.WorkShopGUID
             //为了刷新页面的时候echarts图形不变小
             window.requestAnimationFrame(() => {
-                this.initChart()                
-            })
-            new Swiper('.swiper-container0',{
-                loop: true,
-                autoplay: true,
-                delay: 3000,                
-                observer:true,
-                observeParents:true
-            })
-            new Swiper('.swiper-container1',{
-                loop: true,
-                autoplay: true,
-                delay: 3000,
-                observer:true,
-                observeParents:true
+                this.initChart1()                
+                this.initChart2()                
+                this.initChart3()                
             })
             const that = this
             window.onresize = function() {
@@ -528,6 +514,189 @@ import { setTimeout } from 'timers';
                 that.echartTwo.resize();
                 that.echartThree.resize();
             }
+            //获取设备异常工艺参数列表(用于综合看板--工艺参数监控)
+            this.$axios.post(URL+'/Ecinfo/GetMachineErrorParameter').then(res => {
+                console.log(JSON.parse(res.data))
+                this.ProcessParameters = JSON.parse(res.data)
+                this.$nextTick(() => {
+                    if(this.swiper1) {
+                        this.swiper1.update(false)  
+                    }else {
+                        var swiper1 = new Swiper('.swiper-container1',{
+                            loop: true,
+                            autoplay: true,
+                            delay: 3000,
+                            observer:true,
+                            observeParents:true
+                        })
+                        this.swiper1 = swiper1
+                    }
+                })
+            })
+            //获取不良品评审单中最近30天的状态等于已复核的缺陷数据（top10）(用于综合看板--质量柏拉图)
+            this.$axios.post(URL+'/Qcrejectsorder/GetDefectDetail').then(res => {
+                res.data.forEach((item, index) => {
+                    this.PlatoName = []
+                    this.PlatoQuantity = []
+                    this.PlatoPercent = []
+                    this.PlatoName.push(item.缺陷定义名称)
+                    this.PlatoQuantity.push(item.数量)
+                    this.PlatoPercent.push(item.百分比)
+                })
+                this.initChart3(this.PlatoName, this.PlatoQuantity, this.PlatoPercent)
+                // console.log(this.PlatoName, this.PlatoQuantity, this.PlatoPercent)
+            })
+            //获取指定车间下生产中、未生产、故障中的工作中心数量及比例(用于综合看板--设备状态)
+            this.$axios.post(URL+'/Bsworkcenter/GetWorkcenterState',{
+                WorshopGuid:WORKSHOP
+            }).then(res => {
+                // console.log(res.data)
+                this.EquipmentNo = []
+                this.EquipmentNormal = []
+                this.EquipmentFailure = []
+                this.EquipmentNo = res.data[0].数量
+                this.EquipmentNormal = res.data[1].数量
+                this.EquipmentFailure = res.data[2].数量
+                this.initChart2(this.EquipmentNo, this.EquipmentNormal, this.EquipmentFailure)
+            })
+            //获取指定车间下产线的应上岗工位数和已上岗工位数(用于综合看板--岗位实时状态)
+            this.$axios.post(URL+'/Bsworkcenter/GetWorkcenterPostRealtimeState',{
+                WorshopGuid:WORKSHOP 
+            }).then(res => {
+                // console.log(res.data)
+                this.positionStatus = res.data
+                this.$nextTick(() => {
+                    if(this.swiper0) {
+                        this.swiper0.update(false)  
+                    }else {
+                        var swiper0 = new Swiper('.swiper-container0',{
+                            loop: true,
+                            autoplay: true,
+                            delay: 3000,
+                            observer:true,
+                            observeParents:true
+                        })
+                        this.swiper0 = swiper0
+            
+                    }
+                })
+            })
+            //获取指定车间目标oee平均值和目标teep平均值(用于综合看板--设备效率OEE&产能利用率TEEP)
+            this.$axios.post(URL+'/Bsworkcenter/GetWorkshopTargetOeeAndTeep',{
+                WorshopGuid:WORKSHOP 
+            }).then(res => {
+                // console.log(res.data)
+                this.Target = []
+                this.Target.push(res.data[0].目标OEE)
+                this.Target.push(res.data[0].目标TEEP)
+                console.log(this.Target)
+                this.initChart1(this.History, this.Target, this.Reality)
+            })
+            //获取指定车间实际oee平均值和实际teep平均值(用于综合看板--设备效率OEE&产能利用率TEEP)
+            this.$axios.post(URL+'/Bsworkcenter/GetWorkshopRealtimeOeeAndTeep',{
+                WorshopGuid:WORKSHOP 
+            }).then(res => {
+                this.History = []
+                this.Reality = []
+                this.History.push(res.data[0].历史Oee)
+                this.History.push(res.data[0].历史Teep)
+                this.Reality.push(res.data[0].当日Oee)
+                this.Reality.push(res.data[0].当日Teep)
+                console.log(this.History,this.Reality)
+                this.initChart1(this.History, this.Target, this.Reality)
+            })
+            setInterval(() => {
+                //获取设备异常工艺参数列表(用于综合看板--工艺参数监控)
+                this.$axios.post(URL+'/Ecinfo/GetMachineErrorParameter').then(res => {
+                    console.log(JSON.parse(res.data))
+                    this.ProcessParameters = JSON.parse(res.data)
+                    this.$nextTick(() => {
+                        if(this.swiper1) {
+                            this.swiper1.update(false)   
+                        }else {
+                            var swiper1 = new Swiper('.swiper-container1',{
+                                loop: true,
+                                autoplay: true,
+                                delay: 3000,
+                                observer:true,
+                                observeParents:true
+                            })
+                            this.swiper1 = swiper1
+                        }
+                    })
+                })
+                //获取不良品评审单中最近30天的状态等于已复核的缺陷数据（top10）(用于综合看板--质量柏拉图)
+                this.$axios.post(URL+'/Qcrejectsorder/GetDefectDetail').then(res => {
+                    res.data.forEach((item, index) => {
+                        this.PlatoName = []
+                        this.PlatoQuantity = []
+                        this.PlatoPercent = []
+                        this.PlatoName.push(item.缺陷定义名称)
+                        this.PlatoQuantity.push(item.数量)
+                        this.PlatoPercent.push(item.百分比)
+                    })
+                    this.initChart3(this.PlatoName, this.PlatoQuantity, this.PlatoPercent)
+                    // console.log(this.PlatoName, this.PlatoQuantity, this.PlatoPercent)
+                })
+                //获取指定车间下生产中、未生产、故障中的工作中心数量及比例(用于综合看板--设备状态)
+                this.$axios.post(URL+'/Bsworkcenter/GetWorkcenterState',{
+                    WorshopGuid:WORKSHOP
+                }).then(res => {
+                    // console.log(res.data)
+                    this.EquipmentNo = []
+                    this.EquipmentNormal = []
+                    this.EquipmentFailure = []
+                    this.EquipmentNo = res.data[0].数量
+                    this.EquipmentNormal = res.data[1].数量
+                    this.EquipmentFailure = res.data[2].数量
+                    this.initChart2(this.EquipmentNo, this.EquipmentNormal, this.EquipmentFailure)
+                })
+                //获取指定车间下产线的应上岗工位数和已上岗工位数(用于综合看板--岗位实时状态)
+                this.$axios.post(URL+'/Bsworkcenter/GetWorkcenterPostRealtimeState',{
+                    WorshopGuid:WORKSHOP 
+                }).then(res => {
+                    // console.log(res.data)
+                    this.positionStatus = res.data
+                    this.$nextTick(() => {
+                        if(this.swiper0) {
+                            this.swiper0.update(false)  
+                        }else {
+                            var swiper0 = new Swiper('.swiper-container0',{
+                                loop: true,
+                                autoplay: true,
+                                delay: 3000,
+                                observer:true,
+                                observeParents:true
+                            })
+                            this.swiper0 = swiper0
+                        }
+                    })
+                })
+                //获取指定车间目标oee平均值和目标teep平均值(用于综合看板--设备效率OEE&产能利用率TEEP)
+                this.$axios.post(URL+'/Bsworkcenter/GetWorkshopTargetOeeAndTeep',{
+                    WorshopGuid:WORKSHOP 
+                }).then(res => {
+                    // console.log(res.data)
+                    this.Target = []
+                    this.Target.push(res.data[0].目标OEE)
+                    this.Target.push(res.data[0].目标TEEP)
+                    console.log(this.Target)
+                    this.initChart1(this.History, this.Target, this.Reality)
+                })
+                //获取指定车间实际oee平均值和实际teep平均值(用于综合看板--设备效率OEE&产能利用率TEEP)
+                this.$axios.post(URL+'/Bsworkcenter/GetWorkshopRealtimeOeeAndTeep',{
+                    WorshopGuid:WORKSHOP 
+                }).then(res => {
+                    this.History = []
+                    this.Reality = []
+                    this.History.push(res.data[0].历史Oee)
+                    this.History.push(res.data[0].历史Teep)
+                    this.Reality.push(res.data[0].当日Oee)
+                    this.Reality.push(res.data[0].当日Teep)
+                    console.log(this.History,this.Reality)
+                    this.initChart1(this.History, this.Target, this.Reality)
+                })
+            }, 60000)
         }
     }
 </script>

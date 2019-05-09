@@ -10,7 +10,15 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      // "/Api": {
+      //   target: "http://192.168.100.15/JLDPWebApi/Api",
+      //   changeOrigin: true,
+      //   pathRewrite: {
+      //     '^/Api': ''
+      //   }
+      // }
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
