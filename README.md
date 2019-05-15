@@ -1,4 +1,4 @@
-# tvboard
+# 江玲底盘 TV 客户端
 
 > A Vue.js project
 
