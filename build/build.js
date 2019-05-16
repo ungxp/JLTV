@@ -1,7 +1,17 @@
 'use strict'
 require('./check-versions')()
-
-process.env.NODE_ENV = 'production'
+switch (process.env.NODE_ENV) {
+  case 'production':
+    process.env = require('../config/prod.env')
+    break;
+  case 'test':
+    process.env = require('../config/test.env')
+    break;
+  default:
+    process.env = require('../config/test.env')
+    break;
+}
+// process.env.NODE_ENV = 'production'
 
 const ora = require('ora')
 const rm = require('rimraf')

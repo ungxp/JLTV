@@ -128,7 +128,7 @@ import Swiper from 'swiper'
                 return UnfinishedOrdersPages
             },
         },
-        mounted() { 
+        activated() { 
             //获取今日排产任务单数据
             this.$axios.post('/Mcproductionschedule/GetTodayScheduling').then(res => {
                     this.orderTrackList = JSON.parse(res.data)
@@ -212,7 +212,7 @@ import Swiper from 'swiper'
     .orderManagementBox
         width 19.2rem
         height 10.8rem
-        background url('../../assets/images/bg.png') no-repeat 
+        background url("../../assets/images/bg.png") no-repeat 
         background-size 100% 100%
         .orderManagementBox-left
             float left

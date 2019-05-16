@@ -231,7 +231,7 @@ import { setTimeout, setInterval } from 'timers';
                             },
                             label: {  
                                 normal: {
-                                    formatter: '{c}.0%',
+                                    formatter: '{c}%',
                                     show: true,
                                     fontSize: '68%',
                                     position: 'top',
@@ -260,7 +260,7 @@ import { setTimeout, setInterval } from 'timers';
                             label: {
                                 
                                 normal: {
-                                    formatter: '{c}.0%', //c代表数值
+                                    formatter: '{c}%', //c代表数值
                                     show: true,
                                     fontSize: '68%',
                                     position: 'top',
@@ -289,7 +289,7 @@ import { setTimeout, setInterval } from 'timers';
                             label: {
                                 
                                 normal: {
-                                    formatter: '{c}.0%',
+                                    formatter: '{c}%',
                                     show: true,
                                     fontSize: '68%',
                                     position: 'top',
@@ -499,8 +499,8 @@ import { setTimeout, setInterval } from 'timers';
                 })
             },
         },
-        mounted() {
-            const URL = this.$route.params.url
+        activated() {
+            // const URL = this.$route.params.url
             const WORKSHOP = this.$route.params.WorkShopGUID
             //为了刷新页面的时候echarts图形不变小
             window.requestAnimationFrame(() => {
@@ -515,7 +515,7 @@ import { setTimeout, setInterval } from 'timers';
                 that.echartThree.resize();
             }
             //获取设备异常工艺参数列表(用于综合看板--工艺参数监控)
-            this.$axios.post(URL+'/Ecinfo/GetMachineErrorParameter').then(res => {
+            this.$axios.post('/Ecinfo/GetMachineErrorParameter').then(res => {
                 console.log(JSON.parse(res.data))
                 this.ProcessParameters = JSON.parse(res.data)
                 this.$nextTick(() => {
@@ -534,20 +534,20 @@ import { setTimeout, setInterval } from 'timers';
                 })
             })
             //获取不良品评审单中最近30天的状态等于已复核的缺陷数据（top10）(用于综合看板--质量柏拉图)
-            this.$axios.post(URL+'/Qcrejectsorder/GetDefectDetail').then(res => {
+            this.$axios.post('/Qcrejectsorder/GetDefectDetail').then(res => {
                 res.data.forEach((item, index) => {
                     this.PlatoName = []
                     this.PlatoQuantity = []
                     this.PlatoPercent = []
                     this.PlatoName.push(item.缺陷定义名称)
                     this.PlatoQuantity.push(item.数量)
-                    this.PlatoPercent.push(item.百分比)
+                    this.PlatoPercent.push(item.百分比.toFixed(1))
                 })
                 this.initChart3(this.PlatoName, this.PlatoQuantity, this.PlatoPercent)
                 // console.log(this.PlatoName, this.PlatoQuantity, this.PlatoPercent)
             })
             //获取指定车间下生产中、未生产、故障中的工作中心数量及比例(用于综合看板--设备状态)
-            this.$axios.post(URL+'/Bsworkcenter/GetWorkcenterState',{
+            this.$axios.post('/Bsworkcenter/GetWorkcenterState',{
                 WorshopGuid:WORKSHOP
             }).then(res => {
                 // console.log(res.data)
@@ -560,14 +560,17 @@ import { setTimeout, setInterval } from 'timers';
                 this.initChart2(this.EquipmentNo, this.EquipmentNormal, this.EquipmentFailure)
             })
             //获取指定车间下产线的应上岗工位数和已上岗工位数(用于综合看板--岗位实时状态)
-            this.$axios.post(URL+'/Bsworkcenter/GetWorkcenterPostRealtimeState',{
+            this.$axios.post('/Bsworkcenter/GetWorkcenterPostRealtimeState',{
                 WorshopGuid:WORKSHOP 
             }).then(res => {
-                // console.log(res.data)
+                console.log('岗位实时状态',res.data)
                 this.positionStatus = res.data
                 this.$nextTick(() => {
                     if(this.swiper0) {
                         this.swiper0.update(false)  
+                        // console.log('swiper0',this.swiper0)
+                        // alert('更新成功')
+                        // this.$forceUpdate()
                     }else {
                         var swiper0 = new Swiper('.swiper-container0',{
                             loop: true,
@@ -577,37 +580,39 @@ import { setTimeout, setInterval } from 'timers';
                             observeParents:true
                         })
                         this.swiper0 = swiper0
-            
+                        this.$forceUpdate()
                     }
                 })
             })
             //获取指定车间目标oee平均值和目标teep平均值(用于综合看板--设备效率OEE&产能利用率TEEP)
-            this.$axios.post(URL+'/Bsworkcenter/GetWorkshopTargetOeeAndTeep',{
+            this.$axios.post('/Bsworkcenter/GetWorkshopTargetOeeAndTeep',{
                 WorshopGuid:WORKSHOP 
             }).then(res => {
-                // console.log(res.data)
+                
                 this.Target = []
-                this.Target.push(res.data[0].目标OEE)
-                this.Target.push(res.data[0].目标TEEP)
+                this.Target.push(res.data[0].目标OEE.toFixed(1))
+                this.Target.push(res.data[0].目标TEEP.toFixed(1))
                 console.log(this.Target)
                 this.initChart1(this.History, this.Target, this.Reality)
             })
             //获取指定车间实际oee平均值和实际teep平均值(用于综合看板--设备效率OEE&产能利用率TEEP)
-            this.$axios.post(URL+'/Bsworkcenter/GetWorkshopRealtimeOeeAndTeep',{
+            this.$axios.post('/Bsworkcenter/GetWorkshopRealtimeOeeAndTeep',{
                 WorshopGuid:WORKSHOP 
             }).then(res => {
+                console.log('OEE',res.data)
                 this.History = []
                 this.Reality = []
-                this.History.push(res.data[0].历史Oee)
-                this.History.push(res.data[0].历史Teep)
-                this.Reality.push(res.data[0].当日Oee)
-                this.Reality.push(res.data[0].当日Teep)
+                this.History.push(res.data[0].历史Oee.toFixed(1))
+                this.History.push(res.data[0].历史Teep.toFixed(1))
+                this.Reality.push(res.data[0].当日Oee.toFixed(1))
+                this.Reality.push(res.data[0].当日Teep.toFixed(1))
                 console.log(this.History,this.Reality)
                 this.initChart1(this.History, this.Target, this.Reality)
             })
+            this.$forceUpdate()
             setInterval(() => {
                 //获取设备异常工艺参数列表(用于综合看板--工艺参数监控)
-                this.$axios.post(URL+'/Ecinfo/GetMachineErrorParameter').then(res => {
+                this.$axios.post('/Ecinfo/GetMachineErrorParameter').then(res => {
                     console.log(JSON.parse(res.data))
                     this.ProcessParameters = JSON.parse(res.data)
                     this.$nextTick(() => {
@@ -626,20 +631,20 @@ import { setTimeout, setInterval } from 'timers';
                     })
                 })
                 //获取不良品评审单中最近30天的状态等于已复核的缺陷数据（top10）(用于综合看板--质量柏拉图)
-                this.$axios.post(URL+'/Qcrejectsorder/GetDefectDetail').then(res => {
+                this.$axios.post('/Qcrejectsorder/GetDefectDetail').then(res => {
                     res.data.forEach((item, index) => {
                         this.PlatoName = []
                         this.PlatoQuantity = []
                         this.PlatoPercent = []
                         this.PlatoName.push(item.缺陷定义名称)
                         this.PlatoQuantity.push(item.数量)
-                        this.PlatoPercent.push(item.百分比)
+                        this.PlatoPercent.push(item.百分比.toFixed(1))
                     })
                     this.initChart3(this.PlatoName, this.PlatoQuantity, this.PlatoPercent)
                     // console.log(this.PlatoName, this.PlatoQuantity, this.PlatoPercent)
                 })
                 //获取指定车间下生产中、未生产、故障中的工作中心数量及比例(用于综合看板--设备状态)
-                this.$axios.post(URL+'/Bsworkcenter/GetWorkcenterState',{
+                this.$axios.post('/Bsworkcenter/GetWorkcenterState',{
                     WorshopGuid:WORKSHOP
                 }).then(res => {
                     // console.log(res.data)
@@ -652,7 +657,7 @@ import { setTimeout, setInterval } from 'timers';
                     this.initChart2(this.EquipmentNo, this.EquipmentNormal, this.EquipmentFailure)
                 })
                 //获取指定车间下产线的应上岗工位数和已上岗工位数(用于综合看板--岗位实时状态)
-                this.$axios.post(URL+'/Bsworkcenter/GetWorkcenterPostRealtimeState',{
+                this.$axios.post('/Bsworkcenter/GetWorkcenterPostRealtimeState',{
                     WorshopGuid:WORKSHOP 
                 }).then(res => {
                     // console.log(res.data)
@@ -673,26 +678,26 @@ import { setTimeout, setInterval } from 'timers';
                     })
                 })
                 //获取指定车间目标oee平均值和目标teep平均值(用于综合看板--设备效率OEE&产能利用率TEEP)
-                this.$axios.post(URL+'/Bsworkcenter/GetWorkshopTargetOeeAndTeep',{
+                this.$axios.post('/Bsworkcenter/GetWorkshopTargetOeeAndTeep',{
                     WorshopGuid:WORKSHOP 
                 }).then(res => {
                     // console.log(res.data)
                     this.Target = []
-                    this.Target.push(res.data[0].目标OEE)
-                    this.Target.push(res.data[0].目标TEEP)
+                    this.Target.push(res.data[0].目标OEE.toFixed(1))
+                    this.Target.push(res.data[0].目标TEEP.toFixed(1))
                     console.log(this.Target)
                     this.initChart1(this.History, this.Target, this.Reality)
                 })
                 //获取指定车间实际oee平均值和实际teep平均值(用于综合看板--设备效率OEE&产能利用率TEEP)
-                this.$axios.post(URL+'/Bsworkcenter/GetWorkshopRealtimeOeeAndTeep',{
+                this.$axios.post('/Bsworkcenter/GetWorkshopRealtimeOeeAndTeep',{
                     WorshopGuid:WORKSHOP 
                 }).then(res => {
                     this.History = []
                     this.Reality = []
-                    this.History.push(res.data[0].历史Oee)
-                    this.History.push(res.data[0].历史Teep)
-                    this.Reality.push(res.data[0].当日Oee)
-                    this.Reality.push(res.data[0].当日Teep)
+                    this.History.push(res.data[0].历史Oee.toFixed(1))
+                    this.History.push(res.data[0].历史Teep.toFixed(1))
+                    this.Reality.push(res.data[0].当日Oee.toFixed(1))
+                    this.Reality.push(res.data[0].当日Teep.toFixed(1))
                     console.log(this.History,this.Reality)
                     this.initChart1(this.History, this.Target, this.Reality)
                 })
@@ -705,7 +710,7 @@ import { setTimeout, setInterval } from 'timers';
     .realTimeStatusPageBox
         width 19.2rem
         height 10.8rem
-        background url('../../assets/images/bg.png') no-repeat
+        background url("../../assets/images/bg.png") no-repeat
         background-size 100% 100%
         .realTimeStatus-Top
             width 100%

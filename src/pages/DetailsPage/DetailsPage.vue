@@ -208,7 +208,7 @@ export default {
     // updated(){
 
     // },
-    mounted(){
+    activated(){
       const that = this
       this.getOrderDistribution('/Mcorder/GetProductionProgress','/Mcbarcode/GetProductionTrend','/Mcorder/GetOrderDistribution')
       var timer1 = window.setInterval(()=>{
@@ -241,7 +241,7 @@ export default {
 .big
   width 19.2rem
   height 10.8rem
-  background url('../../assets/images/bg.png') no-repeat
+  background url("../../assets/images/bg.png") no-repeat
   background-size 100% 100%
 //   background-attachment fixed
   position relative

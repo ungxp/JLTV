@@ -25,12 +25,12 @@ export default new Router({
     },
     {
       name: 'realTimeStatusPage',
-      path: '/realTimeStatusPage/:url/:WorkShopGUID',
+      path: '/realTimeStatusPage/:WorkShopGUID',
       component: realTimeStatusPage
     },
     {
       name: 'ChassisPage',
-      path: '/ChassisPage/:url/:watchPoint',
+      path: '/ChassisPage/:watchPoint',
       component: ChassisPage
     },
     {

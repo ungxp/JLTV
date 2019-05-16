@@ -8,21 +8,19 @@
         </div>
         <div class="chooseUrl">
             <div class="url" v-if="showPoint">
-                <label for="ip">请输入服务网址：
-                    <input name='ip' type="text" v-model="URL">
+                <label for="ip">请选择监控点：
                 </label>
                 <select name="" id="" @change="getvalue" ref="watchPoint">
-                    <option value="0">请选择监控点</option>
+                    <option value="0">监控点</option>
                     <option v-for="(item, index) in watchPoint" :key="item.GUID" :value="item.GUID">{{item.监控点名称}}</option>
                 </select>
                 <button @click="gotoChassisPage">确定</button>
             </div>
             <div class="url" v-if="showWorkSpace">
-                <label for="ip">请输入服务网址：
-                    <input name='ip' type="text" v-model="URL">
+                <label for="ip">请选择车间：  
                 </label>
                 <select name="" id="" @change="getworkshop" ref="WorkShop">
-                    <option value="">请选择车间</option>
+                    <option value="0">车间</option>
                     <option v-for="(item, index) in watchWorks" :key="item.GUID" :value="item.GUID">{{item.车间名称}}</option>
                 </select>
                 <button @click="gotorealTimeStatusPage">确定</button>
@@ -45,8 +43,8 @@
                 WatchPointGUID:'',
                 //选择的车间GUID
                 WorkShopGUID:'',
-                //输入的服务地址
-                URL:''
+                // //输入的服务地址
+                // URL:''
             }
         },
         methods: {
@@ -60,11 +58,11 @@
             },
             //点击确定跳转到安灯页
             gotoChassisPage() {
-                this.$router.push({name:'ChassisPage',params:{url: this.URL, watchPoint: this.WatchPointGUID}})
+                this.$router.push({name:'ChassisPage',params:{watchPoint: this.WatchPointGUID}})
             },
             //点击确定跳转综合看板
             gotorealTimeStatusPage() {
-                this.$router.push({name:'realTimeStatusPage',params:{url: this.URL, WorkShopGUID: this.WorkShopGUID}})
+                this.$router.push({name:'realTimeStatusPage',params:{WorkShopGUID: this.WorkShopGUID}})
             },
             gotoorderManagementPage() {
                 this.$router.push({name:'orderManagementPage'})
@@ -86,10 +84,10 @@
                 
             }
         },
-        created() {
-            this.URL = this.$axios.defaults.baseURL
-        },
-        mounted() {
+        // created() {
+        //     this.URL = this.$axios.defaults.baseURL
+        // },
+        activated() {
             //获取监控点
             this.$axios.post('/Andon/GetAndonMonitory').then(res => {
                 this.watchPoint = res.data
@@ -108,7 +106,7 @@
     .homeBigBox 
         width 19.2rem
         height 10.8rem
-        background url('../../assets/images/bg.png') no-repeat
+        background url("../../assets/images/bg.png") no-repeat
         background-size cover
         .smallPictures
             width 100%
@@ -119,7 +117,7 @@
                 width 3.84rem
                 height 2.16rem
         .chooseUrl
-            width 12rem
+            width 8rem
             margin 2rem auto
             .url
                 color #fff
@@ -130,7 +128,7 @@
                         width 5rem
                         height .4rem
                 select 
-                    width 2rem
+                    width 4rem
                     height .4rem
                 button
                     width 1.5rem
