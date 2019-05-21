@@ -12,6 +12,9 @@ import moment from 'moment'
 import 'whatwg-fetch'
 import VueFetch from 'vue-fetch'
 import 'babel-polyfill'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+Vue.use(ElementUI)
 Vue.use(VueFetch, {
   polyfill: true   //should vue-fetch load promise polyfill, set to false to use customer polyfill
 });
@@ -25,15 +28,15 @@ Vue.filter('time', function (value, formatString) {
 if (process.env.NODE_ENV === 'production') {
   //生产环境
   localStorage["host"] = "http://192.168.100.17"
-  axios.defaults.baseURL = 'http://192.168.100.17/JLDPWebApi/Api'; 
+  axios.defaults.baseURL = 'http://192.168.100.17'; 
 } else if(process.env.NODE_ENV === 'test') {
   //测试环境
-  localStorage["host"] = "http://192.168.100.15"
-  axios.defaults.baseURL = 'http://192.168.100.15/JLDPWebApi/Api';
+  localStorage["host"] = "http://192.168.100.17"
+  axios.defaults.baseURL = 'http://192.168.100.17';
 }else {
   // 开发环境
-  localStorage["host"] = "http://192.168.100.15"
-  axios.defaults.baseURL = 'http://192.168.100.15/JLDPWebApi/Api';
+  localStorage["host"] = "http://192.168.100.17"
+  axios.defaults.baseURL = 'http://192.168.100.17';
 }
 /* eslint-disable no-new */
 new Vue({

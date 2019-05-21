@@ -82,7 +82,7 @@ export async  function checkVersion(type){
         let res = await fetch(`${host}/JLDPWebApi/api/ClientVersion/GetLatestVersionForTV`)
         let data = await res.json();
         var newVersion = data;
-        alert(newVersion);
+        // alert(newVersion);
         // bugout.log("寻找新版本...")
         if(newVersion != localStorage["localVersion"])
         {
@@ -110,15 +110,16 @@ export async  function checkVersion(type){
         
             // bugout.log("发现新版本")
             let resDir = await fetch(`${host}/JLDPWebApi/api/ClientVersion/GetLatestUpdateFilesForTV`)
+            // alert(`${host}/JLDPWebApi/api/ClientVersion/GetLatestUpdateFilesForTV`)
             let filesData = await resDir.json();
-            if(filesData.d == "")
+            if(filesData == "")
             {
                 // bugout.log("不好！找不到新版本下载地址")
                 return;
             }
             // 下载wgt文件
-            var wgtUrl=`${host}/JLDPWebApi/` + filesData.d;
-            //alert(wgtUrl);
+            var wgtUrl=`${host}/JLDPWebApi/` + filesData;
+            // alert(wgtUrl);
             downloadWgt();
             function downloadWgt(){
                 plus.io.resolveLocalFileSystemURL("_doc/update",function(entry){
@@ -164,7 +165,7 @@ export async  function checkVersion(type){
                     plus.nativeUI.toast("安装wgt文件失败["+e.code+"]："+e.message);
                     // bugout.log("不好！安装wgt文件失败["+e.code+"]："+e.message);
                     setTimeout(() => {
-                        PostLog();
+                        // PostLog();
                         plus.runtime.restart();
                     }, 2000);
                     

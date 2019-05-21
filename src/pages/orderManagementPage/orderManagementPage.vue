@@ -129,14 +129,26 @@ import Swiper from 'swiper'
             },
         },
         activated() { 
+            sessionStorage.setItem('NowPage',this.$route.path)
+            const that = this
+            window.addEventListener('offline',  function() {
+                 that.$message({
+                    message: '与服务器连接中断，正在尝试重连中...',
+                    type: 'error',
+                    duration: 0
+                })       
+            })
+            window.addEventListener('online',  function() {
+                that.$message.closeAll()       
+            })
             //获取今日排产任务单数据
-            this.$axios.post('/Mcproductionschedule/GetTodayScheduling').then(res => {
+            this.$axios.post('/JLDPWebApi/Api/Mcproductionschedule/GetTodayScheduling').then(res => {
+                console.log(JSON.parse(res.data))
                     this.orderTrackList = JSON.parse(res.data)
                     this.$nextTick(() => {
                         if(this.swiper0) {
-                            this.swiper0.update(false)
-                            
-                        }else {
+                            this.swiper0.update(false)   
+                        }else if(this.orderTrackListPages.length>=2){
                             var swiper0 = new Swiper('.swiper-container0',{
                                 loop: true,
                                 autoplay: true,
@@ -149,12 +161,12 @@ import Swiper from 'swiper'
                     })   
                 })
             //获取未完成订单数据
-            this.$axios.post('/Mcorder/GetUnfinishedOrders').then(res => {
+            this.$axios.post('/JLDPWebApi/Api/Mcorder/GetUnfinishedOrders').then(res => {
                 this.UnfinishedOrders = res.data
                 this.$nextTick(() => {
                     if(this.swiper1) {
                         this.swiper1.update(false)
-                    }else {
+                    }else if(this.UnfinishedOrdersPages.length>=2){
                         var swiper1 = new Swiper('.swiper-container1',{
                             loop: true,
                             autoplay: true,
@@ -168,12 +180,12 @@ import Swiper from 'swiper'
                 })
             })
             setInterval(() => {
-                this.$axios.post('/Mcproductionschedule/GetTodayScheduling').then(res => {
+                this.$axios.post('/JLDPWebApi/Api/Mcproductionschedule/GetTodayScheduling').then(res => {
                     this.orderTrackList = JSON.parse(res.data)
                     this.$nextTick(() => {
                         if(this.swiper0) {
                             this.swiper0.update(false) 
-                        }else {
+                        }else if(this.orderTrackListPages.length>=2){
                             var swiper0 = new Swiper('.swiper-container0',{
                                 loop: true,
                                 autoplay: true,
@@ -185,12 +197,12 @@ import Swiper from 'swiper'
                         }
                     })
                 })
-                this.$axios.post('/Mcorder/GetUnfinishedOrders').then(res => {
+                this.$axios.post('/JLDPWebApi/Api/Mcorder/GetUnfinishedOrders').then(res => {
                     this.UnfinishedOrders = res.data
                     this.$nextTick(() => {
                         if(this.swiper1) {
                             this.swiper1.update(false)
-                        }else {
+                        }else if(this.UnfinishedOrdersPages.length>=2){
                             var swiper1 = new Swiper('.swiper-container1',{
                                 loop: true,
                                 autoplay: true,

@@ -4,11 +4,17 @@
         <p class="txtDistribution">订单分布</p>
         <p class="enDistribution">Order Distribution</p>
         <div class="order">
-          <div class="car" v-for="(item,index) in orderDistribution" :key="index">
-              <img :src="'data:image/png;base64,'+item.图片" alt="汽车" class="carImg">
-              <p class="num">{{item.数量}}</p>
-              <p class="orderNum">订单数量</p>
-              <p class="type">供货类型—{{item.系列名称}}</p>
+          <div class="swiper-containers">
+            <div class="swiper-wrapper">
+              <div class="swiper-slide" v-for="(page, index) in orderPages" :key="index">
+                <div class="car" v-for="(item,index) in page" :key="index">
+                    <img :src="'data:image/png;base64,'+item.图片" alt="汽车" class="carImg">
+                    <p class="num">{{item.数量}}</p>
+                    <p class="orderNum">订单数量</p>
+                    <p class="type">供货类型—{{item.系列名称}}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
     </div>
@@ -35,7 +41,7 @@
                       <div class="barSmall" :style="'width:'+(item.完成率*1).toFixed(1)*4.2+'rem'"></div>
                       <p class="min">0</p>
                       <p class="max">{{item.计划数}}</p>
-                      <p class="barNum">{{item.完工数 == null? 0 : item.完工数}}({{(item.完成率*100).toFixed(1)}}%)</p>
+                      <p class="barNum">{{item.完工数}}({{(item.完成率*100).toFixed(1)}}%)</p>
                       <p class="startTime">{{item.计划开始时间|time}}</p>
                       <p class="endTime">{{item.计划结束时间|time}}</p>
                     </div>
@@ -66,7 +72,9 @@ export default {
         progress:[],
         chart:[],
         orderDistribution:[],
-        swiper0:''
+        swiper0:'',
+        swiper1:'',
+        Max:0
       }
     },
     methods:{
@@ -87,15 +95,15 @@ export default {
               this.$nextTick(() => {//滚动效果
                 if(this.swiper0) {
                   this.swiper0.update(false)
-                }else {
+                }else if(this.pages.length>=2){
                   var myswiper = new Swiper('.swiper-container',{
                     loop: true,
                     autoplay: {
-                      delay: 2000,
+                      delay: 3000,
                       reverseDirection: false,
                       disableOnInteraction:false
                     },
-                    direction: 'vertical',
+                    // direction: 'vertical',
                     observer:true,
                     observeParents:true
                   })
@@ -103,32 +111,83 @@ export default {
                 }
                 
               })
+              // mySwiper.update()
             })
           
           // console.log('dasd')
+          // this.$axios.post(url2).then(res2=>{//取最近30天每天的完工数量合计（用于生产看板-产量走势）
+          //   var data=[]
+          //   var result=JSON.parse(res2.data)
+          //   console.log('产量走势',result)
+          //   result.forEach((item,index)=>{
+          //     data.push(item.数量)
+          //   })
+          //   var max = data.reduce(function(a,b) {
+          //       return b>a?b:a
+          //   })
+          //   this.Max = max
+          //   // console.log(this.Max)
+          //   this.initChart(data,this.Max)
+          //   // console.log(JSON.parse(res2.data))
+          // })
           this.$axios.post(url2).then(res2=>{//取最近30天每天的完工数量合计（用于生产看板-产量走势）
+            console.log('30天',res2)
             var data=[]
+            var dateTime=[]
             var result=JSON.parse(res2.data)
             result.forEach((item,index)=>{
             data.push(item.数量)
+            var time=item.日期.slice(8,10)
+            dateTime.push(time)
             })
-            this.initChart(data)
-            console.log(JSON.parse(res2.data))
+            var max = data.reduce(function(a,b) {
+                return b>a?b:a
+            })
+            this.Max = max % 5 == 0?max:max+(5 - max % 5)
+            console.log('产量走势',data)
+            console.log('日期',dateTime)
+            this.initChart(data,dateTime,this.Max)
+            // console.log(JSON.parse(res2.data))
           })
           this.$axios.post(url3).then(res3=>{//获取订单最近30天的计划数量合计，按车型系列统计（用于生产看板-订单分布）
             // console.log(res3)
             this.orderDistribution=res3.data
+            console.log(res3.data)
+            this.$nextTick(() => {//滚动效果
+                if(this.swiper1) {
+                  this.swiper1.update(false)
+                }else if(this.orderPages.length>=2){
+                  var myswiper = new Swiper('.swiper-containers',{
+                    loop: true,
+                    autoplay: {
+                      delay: 3000,
+                      reverseDirection: false,
+                      disableOnInteraction:false
+                    },
+                    // direction: 'vertical',
+                    observer:true,
+                    observeParents:true
+                  })
+                  this.swiper1 = myswiper
+                }
+                
+              })
+              // mySwiper.update()
           })
           
         },
-        initChart(data){
+        initChart(data,dateTime,Max){
             this.chart = echarts.init(this.$refs.myEchart)
             this.chart.setOption({
+                grid:[{
+                  x:'5%',
+                  y:'25%',
+                  x2:'2%',
+                  y2:'25%'
+                }],
                 xAxis: {
                     type: 'category',
-                    data: ['01', '02', '03', '04', '05', '06', '07','08','09','10',
-                    '11', '12', '13', '14', '15', '16', '17','18','19','20',
-                    '21', '22', '23', '24', '25', '26', '27','28','29','30'],
+                    data: dateTime,
                     axisTick : {show: false},
                     axisLine: {
                         show: true,
@@ -149,8 +208,8 @@ export default {
                 yAxis: {
                     type: 'value',
                     min: 0,
-                    max: 2000,
-                    interval: 500,
+                    max: Max,
+                    interval: parseInt(Max/5),
                     axisTick : {show: false},
                         axisLine: {
                             show: false,
@@ -209,14 +268,28 @@ export default {
 
     // },
     activated(){
+      sessionStorage.setItem('NowPage',this.$route.path)
       const that = this
-      this.getOrderDistribution('/Mcorder/GetProductionProgress','/Mcbarcode/GetProductionTrend','/Mcorder/GetOrderDistribution')
+      window.addEventListener('offline',  function() {
+          that.$message({
+              message: '与服务器连接中断，正在尝试重连中...',
+              type: 'error',
+              duration: 0
+          })      
+      })
+      window.addEventListener('online',  function() {
+          that.$message.closeAll()      
+      })
+      this.getOrderDistribution('/JLDPWebApi/Api/Mcorder/GetProductionProgress','/JLDPWebApi/Api/Mcbarcode/GetProductionTrend','/JLDPWebApi/Api/Mcorder/GetOrderDistribution')
       var timer1 = window.setInterval(()=>{
-        that.getOrderDistribution('/Mcorder/GetProductionProgress','/Mcbarcode/GetProductionTrend','/Mcorder/GetOrderDistribution')
+        that.getOrderDistribution('/JLDPWebApi/Api/Mcorder/GetProductionProgress','/JLDPWebApi/Api/Mcbarcode/GetProductionTrend','/JLDPWebApi/Api/Mcorder/GetOrderDistribution')
       }, 60000);
+      // this.$nextTick(()=>{
+      // })
       window.requestAnimationFrame(() => {//在下次重绘之前调用指定的回调函数更新动画，如果没有这句话，刷新时会获取不到div的宽高
         this.initChart()
       })
+      
       window.addEventListener("resize", function () {
           that.chart.resize()
       });
@@ -225,8 +298,24 @@ export default {
       pages(){
           const pages=[]
           this.progress.forEach((item,index)=>{
+            // console.log(this.progress)
             const page=Math.floor(index/6)
             item.差异数==null?item.差异数=0:item.差异数=item.差异数
+            item.完工数==null?item.完工数=0:item.完工数=item.完工数
+            item.完工率==null?item.完工率=0:item.完工率=item.完工率
+            item.完工数>=item.计划数?item.完成率=100:item.完成率=item.完成率
+            console.log(item.完成率)
+            if(!pages[page]){
+              pages[page]=[]
+            }
+            pages[page].push(item)
+          })
+          return pages
+        },
+        orderPages(){
+          const pages=[]
+          this.orderDistribution.forEach((item,index)=>{
+            const page=Math.floor(index/4)//4个一页
             if(!pages[page]){
               pages[page]=[]
             }
@@ -236,12 +325,13 @@ export default {
         }
     }
 }
+
 </script>
 <style scoped lang='stylus' rel='stylesheet/stylus'>
 .big
   width 19.2rem
   height 10.8rem
-  background url("../../assets/images/bg.png") no-repeat
+  background url('../../assets/images/bg.png') no-repeat
   background-size 100% 100%
 //   background-attachment fixed
   position relative
@@ -255,7 +345,7 @@ export default {
     top 0
   .level
     width 9.59rem
-    height .01rem
+    height .02rem
     background-color #fff
     opacity 0.4
     position absolute
@@ -284,52 +374,66 @@ export default {
       font-family 'PingFang-SC-Medium'
       font-weight 500
     .order
-      width 9.59rem
+      width 9.2rem
       height 6.85rem
-      margin-top .63rem
-      padding-left .19rem
-      padding-right .4rem
-      padding-top .12rem
-      padding-bottom .39rem
-      .car
-        display inline-block
-        float left
-        position relative
-        width 4.27rem
-        height 2.95rem
-        margin-left .21rem
-        margin-top .22rem
-        background rgba(5,53,153,0.18)
-        .carImg
-          position absolute
-          left .08rem
-          top .96rem
-          width 3.44rem
-          height 1.92rem
-        .num
-          font-size .31rem
-          color #fff
-          font-weight 500
-          position absolute
-          right .97rem
-          top .28rem
-          font-family 'PingFang-SC-Medium'
-        .orderNum
-          font-size .15rem
-          color rgba(198,213,253,1)
-          font-weight 500
-          position absolute
-          left 3.3rem
-          top .39rem
-          font-family 'PingFang-SC-Medium'
-        .type
-          font-size .22rem
-          color rgba(198,213,253,1)
-          font-weight 500
-          position absolute
-          right .32rem
-          top .64rem
-          font-family 'PingFang-SC-Medium'
+      // margin-top .12rem
+      // padding-left .19rem
+      // padding-right .4rem
+      // padding-top .63rem
+      // padding-bottom .39rem
+      overflow hidden
+      position absolute
+      left .19rem
+      top .75rem
+      .swiper-containers
+        width 9.15rem
+        height 6.8rem
+        // margin-top .12rem
+        .swiper-wrapper
+          width 9.15rem
+          height 6.8rem
+          .swiper-slide
+            width 9.15rem
+            height 6.8rem
+            .car
+              display inline-block
+              float left
+              position relative
+              width 4.27rem
+              height 2.95rem
+              margin-left .21rem
+              margin-top .22rem
+              background rgba(5,53,153,0.18)
+              .carImg
+                position absolute
+                left .08rem
+                top .96rem
+                width 3.44rem
+                height 1.92rem
+              .num
+                font-size .31rem
+                color #fff
+                font-weight 500
+                position absolute
+                right .97rem
+                top .28rem
+                font-family 'PingFang-SC-Medium'
+              .orderNum
+                font-size .15rem
+                color rgba(198,213,253,1)
+                font-weight 500
+                position absolute
+                left 3.3rem
+                top .39rem
+                font-family 'PingFang-SC-Medium'
+              .type
+                font-size .22rem
+                color rgba(198,213,253,1)
+                font-weight 500
+                position absolute
+                right .32rem
+                top .64rem
+                font-family 'PingFang-SC-Medium'
   .trend
     width 9.59rem
     height 3.31rem
@@ -360,10 +464,10 @@ export default {
       font-weight 500
     .chart
       width 9.3rem
-      height 2.4rem
+      height 3rem
       position absolute
       left .2rem
-      top .7rem
+      top .3rem
   .progress
     width 9.6rem
     height 10.8rem
@@ -387,7 +491,7 @@ export default {
       color rgba(217,239,255,1)
     .swiper-container
       position absolute
-      left 0
+      left .48rem
       top .96rem
       width 9rem
       height 9.55rem
@@ -399,7 +503,7 @@ export default {
           height 9.55rem
           .progressItem
             position relative
-            left .48rem
+            // left .48rem
             top 0
             width 8.64rem
             height 1.34rem
@@ -480,18 +584,25 @@ export default {
               position absolute
               left 2.67rem
               top .52rem
+              width .15rem
+              height .29rem
             .nameGreen
               position absolute
               left 2.67rem
               top .52rem
+              width .15rem
+              height .29rem
             .nameGray
               position absolute
               left 2.6rem
               top .56rem
+              width .37rem
+              height .15rem
             .barBig
               width 4.2rem
               height .27rem
               background rgba(226,231,238,.2)
+              text-align center
               position relative
               left 3.82rem
               top -.1rem
@@ -508,7 +619,9 @@ export default {
                 color #fff
                 font-weight 400
                 line-height 0.27rem
-                text-align center
+                position relative
+                margin-left auto
+                margin-right auto
               .min
                 font-size .18rem
                 color rgba(198,213,253,1)

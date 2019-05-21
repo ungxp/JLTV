@@ -5,18 +5,24 @@ import realTimeStatusPage from '../pages/realTimeStatusPage/realTimeStatusPage.v
 import ChassisPage from '../pages/ChassisPage/ChassisPage.vue' //安灯闪烁看板
 import DetailsPage from '../pages/DetailsPage/DetailsPage.vue' //订单分布及生产进度跟踪
 import homePage from '../pages/home/homePage.vue' //订单分布及生产进度跟踪
+import SwiperPages from '../pages/SwiperPages/SwiperPages.vue' //轮播
 Vue.use(Router)
 
 export default new Router({
   routes: [
     {
       path: '/',
-      redirect: '/homePage'
+      redirect: sessionStorage.getItem('NowPage')?sessionStorage.getItem('NowPage'):'/homePage'
     },
     {
       name: 'homePage',
       path: '/homePage',
       component: homePage
+    },
+    {
+      name: 'SwiperPages',
+      path: '/SwiperPages',
+      component: SwiperPages
     },
     {
       name: 'orderManagementPage',
