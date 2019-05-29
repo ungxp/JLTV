@@ -4,11 +4,11 @@
         <p class="txtDistribution">订单分布</p>
         <p class="enDistribution">Order Distribution</p>
         <div class="order">
-          <div class="swiper-containers">
+          <div class="swiper-container swiper-containerF">
             <div class="swiper-wrapper">
               <div class="swiper-slide" v-for="(page, index) in orderPages" :key="index">
                 <div class="car" v-for="(item,index) in page" :key="index">
-                    <img :src="'data:image/png;base64,'+item.图片" alt="汽车" class="carImg">
+                    <img :src="'data:image/png;base64,'+item.图片" alt="汽车" class="carImg" v-if="item.图片">
                     <p class="num">{{item.数量}}</p>
                     <p class="orderNum">订单数量</p>
                     <p class="type">供货类型—{{item.系列名称}}</p>
@@ -27,7 +27,7 @@
     <div class="progress">
       <p class="txtProgress">生产进度跟踪</p>
       <p class="enProgress">Production Progress</p>
-      <div class="swiper-container">
+      <div class="swiper-container swiper-containerG">
           <div class="swiper-wrapper">
               <div class="swiper-slide" v-for="(page,index) in pages" :key="index">
                 <ul>
@@ -72,8 +72,8 @@ export default {
         progress:[],
         chart:[],
         orderDistribution:[],
-        swiper0:'',
-        swiper1:'',
+        swiperG:'',
+        swiperF:'',
         Max:0
       }
     },
@@ -91,15 +91,17 @@ export default {
             this.$axios.post(url1).then(res => {//获取订单完工情况（用于生产看板-生产进度跟踪）
               // console.log(res)
               // this.progress=[]
+              this.$message.closeAll()
               this.progress=res.data
               this.$nextTick(() => {//滚动效果
-                if(this.swiper0) {
-                  this.swiper0.update(false)
+                if(this.swiperG) {
+                  this.swiperG.update(false)
+                  this.$forceUpdate()
                 }else if(this.pages.length>=2){
-                  var myswiper = new Swiper('.swiper-container',{
-                    loop: true,
+                  var myswiper = new Swiper('.swiper-containerG',{
+                    loop: false,
                     autoplay: {
-                      delay: 3000,
+                      delay: 15000,
                       reverseDirection: false,
                       disableOnInteraction:false
                     },
@@ -107,30 +109,27 @@ export default {
                     observer:true,
                     observeParents:true
                   })
-                  this.swiper0 = myswiper
+                  this.swiperG = myswiper
+                  this.$forceUpdate()
                 }
                 
               })
               // mySwiper.update()
-            })
+            }).catch((error) => {
+                    // console.log(error.message)
+                    if(error.message && error.message == 'Network Error') {
+                        this.$message.error('请求已超时')             
+                    }else if (error.response && error.response.data == '网络已断开' && error.response.status == 502) {
+                        this.$message({
+                            message: '服务已断开',
+                            type: 'error',
+                            duration: 0
+                        })      
+                    }
+                })
           
-          // console.log('dasd')
-          // this.$axios.post(url2).then(res2=>{//取最近30天每天的完工数量合计（用于生产看板-产量走势）
-          //   var data=[]
-          //   var result=JSON.parse(res2.data)
-          //   console.log('产量走势',result)
-          //   result.forEach((item,index)=>{
-          //     data.push(item.数量)
-          //   })
-          //   var max = data.reduce(function(a,b) {
-          //       return b>a?b:a
-          //   })
-          //   this.Max = max
-          //   // console.log(this.Max)
-          //   this.initChart(data,this.Max)
-          //   // console.log(JSON.parse(res2.data))
-          // })
           this.$axios.post(url2).then(res2=>{//取最近30天每天的完工数量合计（用于生产看板-产量走势）
+            this.$message.closeAll()
             console.log('30天',res2)
             var data=[]
             var dateTime=[]
@@ -149,30 +148,55 @@ export default {
             this.initChart(data,dateTime,this.Max)
             // console.log(JSON.parse(res2.data))
           })
-          this.$axios.post(url3).then(res3=>{//获取订单最近30天的计划数量合计，按车型系列统计（用于生产看板-订单分布）
-            // console.log(res3)
+          this.$axios({
+            method: 'post',
+            url: url3,
+            headers: {
+              'Accept-Encoding': 'gzip'
+            }
+          }).then(res3=>{//获取订单最近30天的计划数量合计，按车型系列统计（用于生产看板-订单分布）
+            this.$message.closeAll()
+            console.log('订单分布',res3)
             this.orderDistribution=res3.data
             console.log(res3.data)
-            this.$nextTick(() => {//滚动效果
-                if(this.swiper1) {
-                  this.swiper1.update(false)
-                }else if(this.orderPages.length>=2){
-                  var myswiper = new Swiper('.swiper-containers',{
-                    loop: true,
-                    autoplay: {
-                      delay: 3000,
-                      reverseDirection: false,
-                      disableOnInteraction:false
-                    },
-                    // direction: 'vertical',
-                    observer:true,
-                    observeParents:true
-                  })
-                  this.swiper1 = myswiper
+            if(this.swiperF && this.orderPages.length<2) {
+              this.swiperF.destroy()
+              this.$forceUpdate()
+              this.swiperF = ''
+              this.$forceUpdate()
+            }
+            if(this.orderPages.length>1){
+              this.$nextTick(() => {//滚动效果
+              if(this.swiperF) {
+              // this.swiperF.init()
+              // this.$forceUpdate()
+	              // this.swiperF.update(true)
+                // this.swiperF.autoplay.start()//重新开始轮播
+              }else{
+              var myswiper = new Swiper('.swiper-containerF',{
+                loop: false,
+                autoplay: {
+                  delay: 15000,
+                  reverseDirection: false,
+                  disableOnInteraction:false
+                },
+                // direction: 'vertical',
+                observer:true,
+                observeParents:true,
+                observeSlideChildren:true,
+                on:{
+                  slideChangeTransitionEnd: function(){ 
+                  this.update(true);
+                  this.autoplay.start();
+                  }
                 }
-                
+              })
+              this.swiperF = myswiper
+              this.$forceUpdate()
+              }
               })
               // mySwiper.update()
+            }
           })
           
         },
@@ -268,7 +292,7 @@ export default {
 
     // },
     activated(){
-      sessionStorage.setItem('NowPage',this.$route.path)
+      localStorage.setItem('NowPage',this.$route.path)
       const that = this
       window.addEventListener('offline',  function() {
           that.$message({
@@ -385,7 +409,7 @@ export default {
       position absolute
       left .19rem
       top .75rem
-      .swiper-containers
+      .swiper-containerF
         width 9.15rem
         height 6.8rem
         // margin-top .12rem

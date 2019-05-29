@@ -12,7 +12,7 @@
                    <div><span></span>已完成</div>
                 </div>
             </div>
-            <div class="left-body swiper-container swiper-container0">
+            <div class="left-body swiper-container swiper-containerD">
                 <div class="swiper-wrapper">
                     <ul class="swiper-slide" v-for="(orderTrackListPage, index) in orderTrackListPages" :key="index">
                         <li v-for="(item, index) in orderTrackListPage" :key="index">
@@ -60,7 +60,7 @@
                     <span>差距</span>
                     <span>计划完成日期</span>
                 </div>
-                <div class="swiper-container swiper-container1">
+                <div class="swiper-container swiper-containerE">
                     <div class="swiper-wrapper">
                         <ul class="swiper-slide" v-for="(UnfinishedOrdersPage, index) in UnfinishedOrdersPages" :key="index">
                             <li v-for="(item, index) in UnfinishedOrdersPage" :key="index">
@@ -94,20 +94,18 @@ import Swiper from 'swiper'
                 orderTrackList: [],
                 //未完成订单列表
                 UnfinishedOrders:[],
-                //swiper0
-                swiper0: '',
-                //swiper1
-                swiper1: ''
+                //swiperD
+                swiperD: '',
+                //swiperE
+                swiperE: ''
             }
-        },
-        methods: {
         },
         computed: {
             //今日排产任务单跟踪列表页数
             orderTrackListPages () {
                 const orderTrackListPages = []
                 this.orderTrackList.forEach((item, index) => {
-                    const page = Math.floor(index / 10)
+                    const page = Math.floor(index / 9)
                     if(!orderTrackListPages[page]) {
                         orderTrackListPages[page] = []
                     }
@@ -129,10 +127,10 @@ import Swiper from 'swiper'
             },
         },
         activated() { 
-            sessionStorage.setItem('NowPage',this.$route.path)
+            localStorage.setItem('NowPage',this.$route.path)
             const that = this
             window.addEventListener('offline',  function() {
-                 that.$message({
+                that.$message({
                     message: '与服务器连接中断，正在尝试重连中...',
                     type: 'error',
                     duration: 0
@@ -143,76 +141,119 @@ import Swiper from 'swiper'
             })
             //获取今日排产任务单数据
             this.$axios.post('/JLDPWebApi/Api/Mcproductionschedule/GetTodayScheduling').then(res => {
+                this.$message.closeAll()
                 console.log(JSON.parse(res.data))
                     this.orderTrackList = JSON.parse(res.data)
                     this.$nextTick(() => {
-                        if(this.swiper0) {
-                            this.swiper0.update(false)   
+                        if(this.swiperD) {
+                            this.swiperD.update(false)   
                         }else if(this.orderTrackListPages.length>=2){
-                            var swiper0 = new Swiper('.swiper-container0',{
-                                loop: true,
+                            var swiperD = new Swiper('.swiper-containerD',{
+                                loop: false,
                                 autoplay: true,
-                                delay: 3000,
+                                autoplay: {
+                                    delay: 15000
+                                },
                                 observer:true,
                                 observeParents:true
                             })
-                            this.swiper0 = swiper0
+                            this.swiperD = swiperD
+                            
+                            console.log(this.swiperD)
                         }
                     })   
+                }).catch((error) => {
+                    // console.log(error.message)
+                    if(error.message && error.message == 'Network Error') {
+                        this.$message.error('请求已超时')             
+                    }else if (error.response && error.response.data == '网络已断开' && error.response.status == 502) {
+                        this.$message({
+                            message: '服务已断开',
+                            type: 'error',
+                            duration: 0
+                        })     
+                    }
                 })
             //获取未完成订单数据
             this.$axios.post('/JLDPWebApi/Api/Mcorder/GetUnfinishedOrders').then(res => {
+                this.$message.closeAll()
                 this.UnfinishedOrders = res.data
                 this.$nextTick(() => {
-                    if(this.swiper1) {
-                        this.swiper1.update(false)
+                    if(this.swiperE) {
+                        this.swiperE.update(false)
                     }else if(this.UnfinishedOrdersPages.length>=2){
-                        var swiper1 = new Swiper('.swiper-container1',{
-                            loop: true,
+                        var swiperE = new Swiper('.swiper-containerE',{
+                            loop: false,
                             autoplay: true,
-                            delay: 3000,
-                            direction: 'vertical',
+                            autoplay: {
+                                delay: 15000
+                            },
+                            // direction: 'vertical',
                             observer:true,
                             observeParents:true
                         })
-                        this.swiper1 = swiper1
+                        this.swiperE = swiperE
+                        console.log(this.swiperE)
                     }
                 })
             })
             setInterval(() => {
                 this.$axios.post('/JLDPWebApi/Api/Mcproductionschedule/GetTodayScheduling').then(res => {
+                    this.$message.closeAll()
                     this.orderTrackList = JSON.parse(res.data)
                     this.$nextTick(() => {
-                        if(this.swiper0) {
-                            this.swiper0.update(false) 
+                        if(this.swiperD) {
+                            console.log(this.swiperD)
+                            this.swiperD.update(false) 
+                            this.$forceUpdate()
                         }else if(this.orderTrackListPages.length>=2){
-                            var swiper0 = new Swiper('.swiper-container0',{
-                                loop: true,
+                            var swiperD = new Swiper('.swiper-containerD',{
+                                loop: false,
                                 autoplay: true,
-                                delay: 3000,
+                                autoplay: {
+                                    delay: 15000
+                                },
                                 observer:true,
                                 observeParents:true
                             })
-                            this.swiper0 = swiper0
+                            this.swiperD = swiperD
                         }
+                        // console.log(this.swiperD)
                     })
+                }).catch((error) => {
+                    // console.log(error.message)
+                    if(error.message && error.message == 'Network Error') {
+                        this.$message.error('请求已超时')             
+                    }else if (error.response && error.response.data == '网络已断开' && error.response.status == 502) {
+                        this.$message({
+                            message: '服务已断开',
+                            type: 'error',
+                            duration: 0
+                        })       
+                    }
                 })
                 this.$axios.post('/JLDPWebApi/Api/Mcorder/GetUnfinishedOrders').then(res => {
+                    this.$message.closeAll()
                     this.UnfinishedOrders = res.data
                     this.$nextTick(() => {
-                        if(this.swiper1) {
-                            this.swiper1.update(false)
+                        if(this.swiperE) {
+                            console.log(this.swiperE)                            
+                            this.swiperE.update(false)
+                            this.$forceUpdate()
                         }else if(this.UnfinishedOrdersPages.length>=2){
-                            var swiper1 = new Swiper('.swiper-container1',{
-                                loop: true,
+                            var swiperE = new Swiper('.swiper-containerE',{
+                                loop: false,
                                 autoplay: true,
-                                delay: 3000,
+                                autoplay: {
+                                    delay: 15000
+                                },
                                 direction: 'vertical',
                                 observer:true,
                                 observeParents:true
                             })
-                            this.swiper1 = swiper1
+                            this.swiperE = swiperE
                         }
+                        // console.log(this.swiperE)
                     })
                 })
             },60000)
@@ -278,7 +319,7 @@ import Swiper from 'swiper'
                             height .8rem
                             background rgba(5,53,153,0.18) 
                             border-radius .1rem
-                            padding .12rem .23rem 0 .13rem
+                            padding .08rem .23rem 0 .13rem
                             margin-bottom .17rem
                             .order-left
                                 width 2.71rem
@@ -311,10 +352,15 @@ import Swiper from 'swiper'
                                         display inline-block
                                         font-size .15rem
                                         color rgba(198, 213, 253, 1)
-                                        margin-bottom .08rem
+                                        margin-bottom .06rem
                                         span 
                                             color #ffffff
                                             font-size .15rem
+                                            display inline-block
+                                            width 1.5rem
+                                            white-space: nowrap
+                                            overflow: hidden
+                                            text-overflow: ellipsis
                             .order-middle
                                 float left
                                 width .01rem
@@ -366,7 +412,7 @@ import Swiper from 'swiper'
             float right
             padding-top .37rem
             padding-left .45rem
-            padding-right .46rem
+            // padding-right .46rem
             .right-header
                 width 100%
                 .unfinishedOrder
@@ -383,10 +429,11 @@ import Swiper from 'swiper'
                     float right
                     font-size .2rem
                     color #fff
+                    padding-right .46rem
             .right-body
                 padding-top .66rem
                 .title
-                    width 100%
+                    width 96%
                     border-bottom .02rem solid #0576D2
                     padding-bottom .18rem
                     font-size 0
@@ -425,12 +472,16 @@ import Swiper from 'swiper'
                                     color #ffffff
                                     font-size .18rem
                                     text-align center
+                                    white-space: nowrap
+                                    overflow: hidden
+                                    text-overflow: ellipsis
                                     &:nth-child(1)
                                         width 1.54rem
                                         text-align left
                                         padding-left .14rem
                                     &:nth-child(2)
                                         width 1.54rem
+                                       
                                     &:nth-child(3)
                                         width 1.5rem
                                     &:nth-child(4)  

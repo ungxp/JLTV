@@ -21,7 +21,7 @@
             </div>
             <div class="realTimeStatu">
                 <div class="title">岗位实时状态<span>Position Status</span></div>
-                <div class="jobStatus swiper-container swiper-container0">
+                <div class="jobStatus swiper-container swiper-containerB">
                     <div class="swiper-wrapper">
                         <ul class="swiper-slide" v-for="(page, index) in PositionStatusPages" :key="index">
                             <li v-for="(item, index) in page" :key="index">
@@ -64,7 +64,7 @@
                         <span>理论</span>
                         <span>实际</span>
                     </div>
-                    <div class="swiper-container swiper-container1">
+                    <div class="swiper-container swiper-containerC">
                         <div class="swiper-wrapper">
                             <ul class="swiper-slide" v-for="(page, index) in ProcessParametersPages" :key="index"> 
                                 <li v-for="(item, index) in page" :key="index">
@@ -123,15 +123,16 @@ import { setTimeout, setInterval } from 'timers';
                 Target:[],
                 //设备效率OEE&产能利用率TEEP实际
                 Reality:[],
-                //swiper0
-                swiper0: '',
-                //swiper1
-                swiper1: '',
+                //swiperB
+                swiperB: '',
+                //swiperC
+                swiperC: '',
                 //定时器
                 timer: '',
                 a:1
             }
         },
+        // props:['timer'],
         computed: {
             //工艺参数监控数据页数
             ProcessParametersPages() {
@@ -339,7 +340,7 @@ import { setTimeout, setInterval } from 'timers';
                                     formatter: '{c}%',
                                     textStyle : {
 			                                    fontWeight : 500 ,
-			                                    fontSize : '79%'    //文字的字体大小
+			                                    fontSize : '60%'    //文字的字体大小
 			                                },
                                 },
                             },
@@ -515,7 +516,7 @@ import { setTimeout, setInterval } from 'timers';
             },
         },
         activated() {
-            sessionStorage.setItem('NowPage',this.$route.path)
+            localStorage.setItem('NowPage',this.$route.path)
             // console.log(this.$route.path)
             const that = this
             window.addEventListener('offline',  function() {
@@ -544,30 +545,43 @@ import { setTimeout, setInterval } from 'timers';
             //获取设备异常工艺参数列表(用于综合看板--工艺参数监控)
             if(this.$route.params.WorkShopGUID != '') {
                 this.$axios.post('/JLDPWebApi/Api/Ecinfo/GetMachineErrorParameter').then(res => {
+                    this.$message.closeAll()
                     console.log(JSON.parse(res.data))
                     this.ProcessParameters = JSON.parse(res.data)
                     this.$nextTick(() => {
-                        // if(this.swiper1) {
-                        //     this.swiper1.update(false)  
+                        // if(this.swiperC) {
+                        //     this.swiperC.update(false)  
                         // }else {
                             if(this.ProcessParametersPages.length>=2) {
-                                var swiper1 = new Swiper('.swiper-container1',{
-                                    loop: true,
+                                var swiperC = new Swiper('.swiper-containerC',{
+                                    loop: false,
                                     autoplay: true,
-                                    delay: 3000,
+                                    delay: 15000,
                                     observer:true,
                                     observeParents:true
                                 })
-                                this.swiper1 = swiper1
+                                this.swiperC = swiperC
                             }
-                            
+                            this.$forceUpdate()
                         // }
                     })
+                }).catch((error) => {
+                    // console.log(error.message)
+                    if(error.message && error.message == 'Network Error') {
+                        this.$message.error('请求已超时')             
+                    }else if (error.response && error.response.data == '网络已断开' && error.response.status == 502) {
+                        this.$message({
+                            message: '服务已断开',
+                            type: 'error',
+                            duration: 0
+                        })      
+                    }
                 })
             }
             //获取不良品评审单中最近30天的状态等于已复核的缺陷数据（top10）(用于综合看板--质量柏拉图)
             if(this.$route.params.WorkShopGUID != '') {
                 this.$axios.post('/JLDPWebApi/Api/Qcrejectsorder/GetDefectDetail').then(res => {
+                    this.$message.closeAll()
                     this.PlatoName = []
                     this.PlatoQuantity = []
                     this.PlatoPercent = []
@@ -600,6 +614,7 @@ import { setTimeout, setInterval } from 'timers';
             this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkcenterState',{
                 WorshopGuid:WORKSHOP
             }).then(res => {
+                this.$message.closeAll()
                 console.log('设备状态',res.data)
                 this.EquipmentNo = []
                 this.EquipmentNormal = []
@@ -610,30 +625,32 @@ import { setTimeout, setInterval } from 'timers';
                 this.EquipmentNoNum = res.data[0].数量
                 this.EquipmentNormalNum = res.data[1].数量
                 this.EquipmentFailureNum = res.data[2].数量
-                this.EquipmentNo = parseInt(res.data[0].百分比)
-                this.EquipmentNormal = parseInt(res.data[1].百分比)
-                this.EquipmentFailure = parseInt(res.data[2].百分比)
+                this.EquipmentNo = Math.round(res.data[0].百分比)
+                this.EquipmentNormal = Math.round(res.data[1].百分比)
+                this.EquipmentFailure = res.data[0].百分比 ==0 && res.data[1].百分比 ==0 && res.data[2].百分比 ==0 ? 0:100-this.EquipmentNormal-this.EquipmentNo
+                // console.log('百分比大萨达',this.EquipmentNo,this.EquipmentNormal,this.EquipmentFailure,Math.round(14.285714),Math.round(28.57),Math.round(57.14))
                 this.initChart2(this.EquipmentNo, this.EquipmentNormal, this.EquipmentFailure)
             })
             //获取指定车间下产线的应上岗工位数和已上岗工位数(用于综合看板--岗位实时状态)
             this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkcenterPostRealtimeState',{
                 WorshopGuid:WORKSHOP 
             }).then(res => {
+                this.$message.closeAll()
                 console.log('岗位实时状态',res.data)
                 this.positionStatus = res.data
                 this.$nextTick(() => {
-                    // if(this.swiper0) {
-                    //     this.swiper0.update(true)  
+                    // if(this.swiperB) {
+                    //     this.swiperB.update(true)  
                     // }else {
                         if(this.PositionStatusPages.length>=2) {
-                            var swiper0 = new Swiper('.swiper-container0',{
-                                loop: true,
+                            var swiperB = new Swiper('.swiper-containerB',{
+                                loop: false,
                                 autoplay: true,
-                                delay: 3000,
+                                delay: 15000,
                                 observer:true,
                                 observeParents:true
                             })
-                            this.swiper0 = swiper0
+                            this.swiperB = swiperB
                             this.$forceUpdate()
                         }
                 })
@@ -642,7 +659,7 @@ import { setTimeout, setInterval } from 'timers';
             this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkshopTargetOeeAndTeep',{
                 WorshopGuid:WORKSHOP 
             }).then(res => {
-                
+                this.$message.closeAll()
                 this.Target = []
                 this.Target.push(res.data[0].目标OEE.toFixed(1))
                 this.Target.push(res.data[0].目标TEEP.toFixed(1))
@@ -653,6 +670,7 @@ import { setTimeout, setInterval } from 'timers';
             this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkshopRealtimeOeeAndTeep',{
                 WorshopGuid:WORKSHOP 
             }).then(res => {
+                this.$message.closeAll()
                 console.log('OEE',res.data)
                 this.History = []
                 this.Reality = []
@@ -668,34 +686,48 @@ import { setTimeout, setInterval } from 'timers';
                 //获取设备异常工艺参数列表(用于综合看板--工艺参数监控)
                 if(this.$route.params.WorkShopGUID != 0) {
                     this.$axios.post('/JLDPWebApi/Api/Ecinfo/GetMachineErrorParameter').then(res => {
+                        this.$message.closeAll()
                         console.log(JSON.parse(res.data))
                         this.ProcessParameters = JSON.parse(res.data)
                         if(this.ProcessParametersPages.length>=2){
                             this.$nextTick(() => {
                                 
-                                    if(this.swiper1) {
-                                        this.swiper1.update(false)   
+                                    if(this.swiperC) {
+                                        this.swiperC.update(false)  
+                                        this.$forceUpdate() 
                                     }else {
-                                        var swiper1 = new Swiper('.swiper-container1',{
-                                            loop: true,
+                                        var swiperC = new Swiper('.swiper-containerC',{
+                                            loop: false,
                                             autoplay: true,
-                                            delay: 3000,
+                                            delay: 15000,
                                             observer:true,
                                             observeParents:true
                                         })
-                                        this.swiper1 = swiper1
+                                        this.swiperC = swiperC
                                     }
-                                
+                                this.$forceUpdate()
                                 
                             })
-                        }else if(this.swiper1 != ''){
-                           this.swiper1.destroy() 
+                        }else if(this.swiperC != ''){
+                           this.swiperC.destroy() 
                         }
-                    })
+                    }).catch((error) => {
+                    // console.log(error.message)
+                    if(error.message && error.message == 'Network Error') {
+                        this.$message.error('请求已超时')             
+                    }else if (error.response && error.response.data == '网络已断开' && error.response.status == 502) {
+                        this.$message({
+                            message: '服务已断开',
+                            type: 'error',
+                            duration: 0
+                        })      
+                    }
+                })
                 }
                 //获取不良品评审单中最近30天的状态等于已复核的缺陷数据（top10）(用于综合看板--质量柏拉图)
                 if(this.$route.params.WorkShopGUID != '') {
                     this.$axios.post('/JLDPWebApi/Api/Qcrejectsorder/GetDefectDetail').then(res => {
+                        this.$message.closeAll()
                         this.PlatoName = []
                         this.PlatoQuantity = []
                         this.PlatoPercent = []
@@ -727,6 +759,7 @@ import { setTimeout, setInterval } from 'timers';
                 this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkcenterState',{
                     WorshopGuid:WORKSHOP
                 }).then(res => {
+                    this.$message.closeAll()
                     console.log(res.data)
                     this.EquipmentNo = []
                     this.EquipmentNormal = []
@@ -737,29 +770,32 @@ import { setTimeout, setInterval } from 'timers';
                     this.EquipmentNoNum = res.data[0].数量
                     this.EquipmentNormalNum = res.data[1].数量
                     this.EquipmentFailureNum = res.data[2].数量
-                    this.EquipmentNo = parseInt(res.data[0].百分比)
-                    this.EquipmentNormal = parseInt(res.data[1].百分比)
-                    this.EquipmentFailure = parseInt(res.data[2].百分比)
+                    this.EquipmentNo = Math.round(res.data[0].百分比)
+                    this.EquipmentNormal = Math.round(res.data[1].百分比)
+                    this.EquipmentFailure = res.data[0].百分比 ==0 && res.data[1].百分比 ==0 && res.data[2].百分比 ==0 ? 0:100-this.EquipmentNormal-this.EquipmentNo
                     this.initChart2(this.EquipmentNo, this.EquipmentNormal, this.EquipmentFailure)
                 })
                 //获取指定车间下产线的应上岗工位数和已上岗工位数(用于综合看板--岗位实时状态)
                 this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkcenterPostRealtimeState',{
                     WorshopGuid:WORKSHOP 
                 }).then(res => {
+                    this.$message.closeAll()
                     // console.log(res.data)
                     this.positionStatus = res.data
                     this.$nextTick(() => {
-                        if(this.swiper0) {
-                            this.swiper0.update(false)  
+                        if(this.swiperB) {
+                            this.swiperB.update(false)
+                            this.$forceUpdate()  
                         }else if(this.PositionStatusPages.length>=2) {
-                            var swiper0 = new Swiper('.swiper-container0',{
-                                loop: true,
+                            var swiperB = new Swiper('.swiper-containerB',{
+                                loop: false,
                                 autoplay: true,
-                                delay: 3000,
+                                delay: 15000,
                                 observer:true,
                                 observeParents:true
                             })
-                            this.swiper0 = swiper0
+                            this.swiperB = swiperB
+                            this.$forceUpdate()
                         }
                     })
                 })
@@ -767,6 +803,7 @@ import { setTimeout, setInterval } from 'timers';
                 this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkshopTargetOeeAndTeep',{
                     WorshopGuid:WORKSHOP 
                 }).then(res => {
+                    this.$message.closeAll()
                     // console.log(res.data)
                     this.Target = []
                     this.Target.push(res.data[0].目标OEE.toFixed(1))
@@ -778,6 +815,7 @@ import { setTimeout, setInterval } from 'timers';
                 this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkshopRealtimeOeeAndTeep',{
                     WorshopGuid:WORKSHOP 
                 }).then(res => {
+                    this.$message.closeAll()
                     this.History = []
                     this.Reality = []
                     this.History.push(res.data[0].历史Oee.toFixed(1))
@@ -788,13 +826,14 @@ import { setTimeout, setInterval } from 'timers';
                     this.initChart1(this.History, this.Target, this.Reality)
                 })
             }, 60000)
+            this.$emit('canceltimer',this.timer)
         },
         beforeRouteLeave (to, from, next) {
             if(this.timer) {
                 window.clearInterval(this.timer)
             }
             next()
-        }
+        },
     }
     
 </script>
@@ -852,6 +891,7 @@ import { setTimeout, setInterval } from 'timers';
                         height 4rem
                 &:nth-child(2)
                     position relative
+                    width 6.6rem
                     .title
                         font-size .32rem
                         color #fff
@@ -861,7 +901,7 @@ import { setTimeout, setInterval } from 'timers';
                             font-size .2rem
                             padding-left .16rem
                     .echartTwo
-                        width 4.6rem
+                        width 4.8rem
                         height 4.5rem
                         position absolute 
                         bottom 0
@@ -899,6 +939,7 @@ import { setTimeout, setInterval } from 'timers';
                                 font-size .48rem
                                 padding-left .22rem
                 &:nth-child(3)
+                    width 6.2rem
                     .title
                         font-size .32rem
                         color #fff
@@ -995,7 +1036,7 @@ import { setTimeout, setInterval } from 'timers';
                         font-size .2rem
                         padding-left .16rem   
                 .processParameters
-                    padding .4rem .56rem 0 .4rem
+                    padding .4rem 0 0 .4rem
                     .ptitle
                         width 100%
                         border-bottom .02rem solid #0576D2
@@ -1023,7 +1064,7 @@ import { setTimeout, setInterval } from 'timers';
                                 text-align right
                     .swiper-container
                         width 100%
-                        height 3.48rem
+                        height 3.4rem
                         .swiper-wrapper
                             .swiper-slide
                                 li 
@@ -1033,7 +1074,7 @@ import { setTimeout, setInterval } from 'timers';
                                     padding-top .28rem
                                     span 
                                         display inline-block  
-                                        line-height .5rem
+                                        // line-height .5rem
                                         color #ffffff
                                         font-size .18rem
                                         text-align center

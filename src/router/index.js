@@ -12,7 +12,7 @@ export default new Router({
   routes: [
     {
       path: '/',
-      redirect: sessionStorage.getItem('NowPage')?sessionStorage.getItem('NowPage'):'/homePage'
+      redirect: localStorage.getItem('NowPage')?localStorage.getItem('NowPage'):'/homePage'
     },
     {
       name: 'homePage',
@@ -21,7 +21,7 @@ export default new Router({
     },
     {
       name: 'SwiperPages',
-      path: '/SwiperPages',
+      path: '/SwiperPages/:watchPoint/:WorkShopGUID/:choosedTVboardList',
       component: SwiperPages
     },
     {
