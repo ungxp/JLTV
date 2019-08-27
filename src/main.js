@@ -19,26 +19,34 @@ Vue.use(ElementUI)
 Vue.use(VueFetch, {
   polyfill: true   //should vue-fetch load promise polyfill, set to false to use customer polyfill
 });
+// import Vconsole from 'vconsole';
+// const vConsole = new Vconsole();
+// Vue.use(vConsole)
 // axios.defaults.baseURL = 'http://192.168.100.15/JLDPWebApi/Api'
 Vue.prototype.$axios = axios
+// if(localStorage.getItem('IP')) {
+//   axios.defaults.baseURL = 'http://'+localStorage.getItem('IP')
+// }else {
+//   axios.defaults.baseURL = 'http://192.168.100.17'
+// }
 Vue.config.productionTip = false
 Vue.filter('time', function (value, formatString) {
   formatString = formatString || 'YYYY-MM-DD';
   return moment(value).format(formatString);
 })
-if (process.env.NODE_ENV === 'production') {
-  //生产环境
-  localStorage["host"] = "http://192.168.100.17"
-  axios.defaults.baseURL = 'http://192.168.100.17'; 
-} else if(process.env.NODE_ENV === 'test') {
-  //测试环境
-  localStorage["host"] = "http://192.168.100.17"
-  axios.defaults.baseURL = 'http://192.168.100.17';
-}else {
-  // 开发环境
-  localStorage["host"] = "http://192.168.100.17"
-  axios.defaults.baseURL = 'http://192.168.100.17';
-}
+// if (process.env.NODE_ENV === 'production') {
+//   //生产环境
+//   localStorage["host"] = "http://192.168.100.17"
+//   axios.defaults.baseURL = 'http://192.168.100.17'; 
+// } else if(process.env.NODE_ENV === 'test') {
+//   //测试环境
+//   localStorage["host"] = "http://192.168.100.17"
+//   axios.defaults.baseURL = 'http://192.168.100.17';
+// }else {
+//   // 开发环境
+//   localStorage["host"] = "http://192.168.100.17"
+//   axios.defaults.baseURL = 'http://192.168.100.17';
+// }
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

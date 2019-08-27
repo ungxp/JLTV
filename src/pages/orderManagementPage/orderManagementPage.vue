@@ -3,7 +3,7 @@
         <div class="orderManagementBox-left">
             <div class="left-header">
                 <div class="orderTrack">
-                    <p>今日排产任务单跟踪</p>
+                    <p>今日生产订单跟踪</p>
                     <p>Today's scheduling</p>
                 </div>
                 <div class="orderStatus">
@@ -13,17 +13,17 @@
                 </div>
             </div>
             <div class="left-body swiper-container swiper-containerD">
-                <div class="swiper-wrapper">
-                    <ul class="swiper-slide" v-for="(orderTrackListPage, index) in orderTrackListPages" :key="index">
+                <div class="swiper-wrapper">   
+                    <ul class="swiper-slide" v-for="(orderTrackListPage, index) in orderTrackListPages" :key="index">                        
                         <li v-for="(item, index) in orderTrackListPage" :key="index">
                             <div class="order-left">
                                 <span class="status1" v-show="item.状态 == '未开始'"></span>
                                 <span class="status2" v-show="item.状态 == '进行中'"></span>
                                 <span class="status3" v-show="item.状态 == '已完成'"></span>
                                 <div>
-                                    <div>订单编号：<span>{{item.订单编号}}</span></div>
-                                    <div>排产单号：<span>{{item.排产单号}}</span></div>
-                                    <div>产品编号：<span>{{item.产品编号}}</span></div>
+                                    <div><span>订单编号：</span><span>{{item.订单编号}}</span></div>
+                                    <!-- <div>排产单号：<span>{{item.排产单号}}</span></div> -->
+                                    <div><span>产品编号：</span><span>{{item.产品编号}}</span></div>
                                 </div>
                             </div>
                             <div class="order-middle"></div>
@@ -90,7 +90,7 @@ import Swiper from 'swiper'
     export default {
         data() {
             return {
-                //今日排产任务单跟踪列表
+                //今日生产订单跟踪
                 orderTrackList: [],
                 //未完成订单列表
                 UnfinishedOrders:[],
@@ -101,7 +101,7 @@ import Swiper from 'swiper'
             }
         },
         computed: {
-            //今日排产任务单跟踪列表页数
+            //今日生产订单跟踪页数
             orderTrackListPages () {
                 const orderTrackListPages = []
                 this.orderTrackList.forEach((item, index) => {
@@ -111,6 +111,7 @@ import Swiper from 'swiper'
                     }
                     orderTrackListPages[page].push(item)
                 })
+                console.log('今日生产订单跟踪页数',orderTrackListPages)
                 return orderTrackListPages
             },
             //未完成订单列表页数
@@ -139,11 +140,11 @@ import Swiper from 'swiper'
             window.addEventListener('online',  function() {
                 that.$message.closeAll()       
             })
-            //获取今日排产任务单数据
-            this.$axios.post('/JLDPWebApi/Api/Mcproductionschedule/GetTodayScheduling').then(res => {
+            //获取今日生产订单跟踪数据
+            this.$axios.post('/JLDPWebApi/api/MCorder/GetTodayorder').then(res => {
                 this.$message.closeAll()
-                console.log(JSON.parse(res.data))
-                    this.orderTrackList = JSON.parse(res.data)
+                    console.log('今日生产订单跟踪',res.data)
+                    this.orderTrackList = res.data
                     this.$nextTick(() => {
                         if(this.swiperD) {
                             this.swiperD.update(false)   
@@ -198,7 +199,7 @@ import Swiper from 'swiper'
                 })
             })
             setInterval(() => {
-                this.$axios.post('/JLDPWebApi/Api/Mcproductionschedule/GetTodayScheduling').then(res => {
+                this.$axios.post('/JLDPWebApi/api/MCorder/GetTodayorder').then(res => {
                     this.$message.closeAll()
                     this.orderTrackList = JSON.parse(res.data)
                     this.$nextTick(() => {
@@ -283,7 +284,7 @@ import Swiper from 'swiper'
                         display inline-block
                         color #fff
                         &:first-child 
-                            font-size .31rem
+                            font-size .33rem
                             padding-right .12rem
                         &:last-child 
                             font-size .2rem                        
@@ -291,7 +292,7 @@ import Swiper from 'swiper'
                     float right
                     div
                         display inline-block
-                        font-size .2rem
+                        font-size .22rem
                         color #fff
                         margin-right .28rem
                         span                            
@@ -350,17 +351,26 @@ import Swiper from 'swiper'
                                     width 2.42rem
                                     div
                                         display inline-block
-                                        font-size .15rem
+                                        width 2.42rem
+                                        font-size .17rem
                                         color rgba(198, 213, 253, 1)
-                                        margin-bottom .06rem
+                                        margin-top .05rem
+                                        height .2rem
+                                        line-height .2rem
                                         span 
                                             color #ffffff
-                                            font-size .15rem
+                                            font-size .17rem
                                             display inline-block
+                                            height 100%
+                                            line-height .2rem
                                             width 1.5rem
                                             white-space: nowrap
                                             overflow: hidden
                                             text-overflow: ellipsis
+                                            &:first-child
+                                                width .9rem
+                                        &:last-child
+                                            margin-top .15rem
                             .order-middle
                                 float left
                                 width .01rem
@@ -392,16 +402,16 @@ import Swiper from 'swiper'
                                             span 
                                                 color #ffffff
                                                 &:first-child
-                                                    font-size .2rem
+                                                    font-size .22rem
                                                     padding-right .1rem
                                                 &:last-child
-                                                    font-size .15rem
+                                                    font-size .17rem
                                 .order-right-bottom
                                     width 100%
                                     padding-top .1rem
                                     span 
                                         color #fff
-                                        font-size .18rem
+                                        font-size .2rem
                                         &:first-child
                                             float left 
                                         &:last-child
@@ -421,7 +431,7 @@ import Swiper from 'swiper'
                         display inline-block
                         color #fff
                         &:first-child 
-                            font-size .31rem
+                            font-size .33rem
                             padding-right .12rem
                         &:last-child 
                             font-size .2rem 
@@ -439,7 +449,7 @@ import Swiper from 'swiper'
                     font-size 0
                     span  
                         display inline-block  
-                        font-size .21rem
+                        font-size .23rem
                         color #fff
                         text-align center
                         &:nth-child(1)
@@ -470,7 +480,7 @@ import Swiper from 'swiper'
                                     height 100%
                                     line-height .71rem
                                     color #ffffff
-                                    font-size .18rem
+                                    font-size .2rem
                                     text-align center
                                     white-space: nowrap
                                     overflow: hidden

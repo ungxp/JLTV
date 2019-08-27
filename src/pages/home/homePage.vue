@@ -65,7 +65,7 @@
                 //选择的车间GUID
                 WorkShopGUID:'0',
                 //输入的服务地址
-                URL:'192.168.100.17',
+                URL:'192.168.80.249',
                 //ip合法判断
                 IPflag:0,
                 //获得焦点的图片
@@ -78,6 +78,18 @@
                 activateFlag2:false,
                 activateFlag3:false,
                 activateFlag4:false,
+            }
+        },
+        created() {
+            // console.log('dasdasdasdsa')
+            if(localStorage.getItem('IP')) {
+                this.URL = localStorage.getItem('IP')
+                console.log(localStorage.getItem('IP'))
+                localStorage["host"] = "http://"+this.URL+""
+                this.$axios.defaults.baseURL = "http://"+this.URL+""
+            }else {
+                localStorage["host"] = "http://192.168.80.249"
+                this.$axios.defaults.baseURL = "http://192.168.80.249"
             }
         },
         methods: {
@@ -205,14 +217,15 @@
                 if(this.choosedTVboard.length != 0) {
                     this.$router.push({name:'SwiperPages',params:{watchPoint:this.WatchPointGUID,WorkShopGUID:this.WorkShopGUID,choosedTVboardList:JSON.stringify(this.choosedTVboard)}})
                     this.choosedTVboard = []
+                    this.showPoint =false
+                    this.showWorkSpace = false
+                    this.showDD = false
+                    this.showEE = false
                 }else {
                     this.$message.error('请选择看板')
                 }
             }
         },
-        // created() {
-        //     this.URL = this.$axios.defaults.baseURL
-        // },
         activated() {
             this.$refs.lj.focus()
             // console.log(this.isValidIP('192.168.145.13l'))
@@ -254,7 +267,11 @@
         },
         watch: {
             'URL'() {
+                this.watchPoint = []
+                this.watchWorks = []
                 this.$axios.defaults.baseURL = 'http://'+this.URL
+                localStorage.setItem('IP',this.URL)
+                localStorage["host"] = "http://"+this.URL
                 if(!this.isValidIP(this.URL)) {
                     this.$message.error('IP地址不合法')
                     // console.log(this.isValidIP(this.URL))

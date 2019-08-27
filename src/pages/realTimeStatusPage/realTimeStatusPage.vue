@@ -52,7 +52,7 @@
                 <div class="echartThree" ref="echartThree">
                 </div>
             </div>
-            <div class="paramsWatch">
+            <!-- <div class="paramsWatch">
                 <div class="title">
                     工艺参数监控<span>Process Parameters</span>
                 </div>
@@ -78,7 +78,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 </template>
@@ -193,7 +193,7 @@ import { setTimeout, setInterval } from 'timers';
                                 textStyle: {
                                     color: '#fff'
                                 },
-                                fontSize: '72%',
+                                fontSize: '74%',
                                 margin:17, //控制X轴文字与轴线之间的距离
                             }
                         },
@@ -205,7 +205,7 @@ import { setTimeout, setInterval } from 'timers';
                             textStyle: {
                                 color: '#fff'
                             },
-                            fontSize: '54%'
+                            fontSize: '56%'
                         },
                         min: 0.0,
                         max: 100.0,
@@ -367,6 +367,10 @@ import { setTimeout, setInterval } from 'timers';
                 this.echartThree = echarts.init(this.$refs.echartThree)
                 this.echartThree.setOption({
                     color: ['#228FFE'],
+                    grid: {
+                        left: '8%',
+                        right: '8%'
+                    },
                     xAxis: [
                         {
                             type: 'category',
@@ -532,11 +536,11 @@ import { setTimeout, setInterval } from 'timers';
             // const URL = this.$route.params.url
             const WORKSHOP = this.$route.params.WorkShopGUID
             //为了刷新页面的时候echarts图形不变小
-            window.requestAnimationFrame(() => {
-                this.initChart1()                
-                this.initChart2()                
-                this.initChart3()                
-            })
+            // window.requestAnimationFrame(() => {
+            //     this.initChart1()                
+            //     this.initChart2()                
+            //     this.initChart3()                
+            // })
             window.onresize = function() {
                 that.echartOne.resize();
                 that.echartTwo.resize();
@@ -546,7 +550,7 @@ import { setTimeout, setInterval } from 'timers';
             if(this.$route.params.WorkShopGUID != '') {
                 this.$axios.post('/JLDPWebApi/Api/Ecinfo/GetMachineErrorParameter').then(res => {
                     this.$message.closeAll()
-                    console.log(JSON.parse(res.data))
+                    // console.log(JSON.parse(res.data))
                     this.ProcessParameters = JSON.parse(res.data)
                     this.$nextTick(() => {
                         // if(this.swiperC) {
@@ -587,7 +591,7 @@ import { setTimeout, setInterval } from 'timers';
                     this.PlatoPercent = []
                     this.computedPlato = []
                     this.PlatoPercentN = []
-                    console.log('质量柏拉图', res.data)
+                    // console.log('质量柏拉图', res.data)
                     res.data.forEach((item, index) => {
                         this.PlatoName.push(item.缺陷定义名称)
                         this.PlatoQuantity.push(item.数量)
@@ -598,7 +602,7 @@ import { setTimeout, setInterval } from 'timers';
                         return b>a?b:a
                     })
                     this.Max = max % 5 == 0?max:max+(5 - max % 5)
-                    console.log('百分比',this.Max)
+                    // console.log('百分比',this.Max)
                     var sum = 0
                     for(var i = 0; i<this.PlatoPercentN.length; i++) {
                         sum = sum + parseFloat(this.PlatoPercent[i])
@@ -606,6 +610,7 @@ import { setTimeout, setInterval } from 'timers';
                     }
                     // console.log('dasdsadsada',this.computedPlato)
                     this.initChart3(this.PlatoName, this.PlatoQuantity, this.computedPlato, this.Max)
+                     this.$forceUpdate()
                     // console.log(this.PlatoName, this.PlatoQuantity, this.PlatoPercent)
                 })
             }
@@ -615,7 +620,7 @@ import { setTimeout, setInterval } from 'timers';
                 WorshopGuid:WORKSHOP
             }).then(res => {
                 this.$message.closeAll()
-                console.log('设备状态',res.data)
+                // console.log('设备状态',res.data)
                 this.EquipmentNo = []
                 this.EquipmentNormal = []
                 this.EquipmentFailure = []
@@ -625,11 +630,12 @@ import { setTimeout, setInterval } from 'timers';
                 this.EquipmentNoNum = res.data[0].数量
                 this.EquipmentNormalNum = res.data[1].数量
                 this.EquipmentFailureNum = res.data[2].数量
-                this.EquipmentNo = Math.round(res.data[0].百分比)
+                this.EquipmentNo = Math.round(res.data[0].百分比)+Math.round(res.data[1].百分比) >100 ?Math.round(res.data[0].百分比)-1:Math.round(res.data[0].百分比)
                 this.EquipmentNormal = Math.round(res.data[1].百分比)
                 this.EquipmentFailure = res.data[0].百分比 ==0 && res.data[1].百分比 ==0 && res.data[2].百分比 ==0 ? 0:100-this.EquipmentNormal-this.EquipmentNo
                 // console.log('百分比大萨达',this.EquipmentNo,this.EquipmentNormal,this.EquipmentFailure,Math.round(14.285714),Math.round(28.57),Math.round(57.14))
                 this.initChart2(this.EquipmentNo, this.EquipmentNormal, this.EquipmentFailure)
+                this.$forceUpdate()
             })
             //获取指定车间下产线的应上岗工位数和已上岗工位数(用于综合看板--岗位实时状态)
             this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkcenterPostRealtimeState',{
@@ -656,38 +662,41 @@ import { setTimeout, setInterval } from 'timers';
                 })
             })
             //获取指定车间目标oee平均值和目标teep平均值(用于综合看板--设备效率OEE&产能利用率TEEP)
+            //获取指定车间实际oee平均值和实际teep平均值(用于综合看板--设备效率OEE&产能利用率TEEP)
             this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkshopTargetOeeAndTeep',{
                 WorshopGuid:WORKSHOP 
             }).then(res => {
+                // console.log(res.data[0].目标TEEP)
                 this.$message.closeAll()
                 this.Target = []
-                this.Target.push(res.data[0].目标OEE.toFixed(1))
-                this.Target.push(res.data[0].目标TEEP.toFixed(1))
-                // console.log(this.Target)
-                this.initChart1(this.History, this.Target, this.Reality)
+                this.Target.push(res.data[0].目标OEE != null?res.data[0].目标OEE.toFixed(1):0.0.toFixed(1))
+                this.Target.push(res.data[0].目标TEEP != null?res.data[0].目标TEEP.toFixed(1):0.0.toFixed(1))
+                console.log('目标',this.Target)
+                this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkshopRealtimeOeeAndTeep',{
+                    WorshopGuid:WORKSHOP 
+                }).then(res => {
+                    console.log('实际',res)
+                    this.$message.closeAll()
+                    // console.log('OEE',res.data)
+                    this.History = []
+                    this.Reality = []
+                    this.History.push(res.data[0].历史Oee != null?res.data[0].历史Oee.toFixed(1):0.0.toFixed(1))
+                    this.History.push(res.data[0].历史Teep != null?res.data[0].历史Teep.toFixed(1):0.0.toFixed(1))
+                    this.Reality.push(res.data[0].当日Oee != null?res.data[0].当日Oee.toFixed(1):0.0.toFixed(1))
+                    this.Reality.push(res.data[0].当日Teep != null?res.data[0].当日Teep.toFixed(1):0.0.toFixed(1))
+                    this.initChart1(this.History, this.Target, this.Reality)
+                     this.$forceUpdate()
+                })
+                // this.initChart1(this.History, this.Target, this.Reality)
             })
-            //获取指定车间实际oee平均值和实际teep平均值(用于综合看板--设备效率OEE&产能利用率TEEP)
-            this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkshopRealtimeOeeAndTeep',{
-                WorshopGuid:WORKSHOP 
-            }).then(res => {
-                this.$message.closeAll()
-                console.log('OEE',res.data)
-                this.History = []
-                this.Reality = []
-                this.History.push(res.data[0].历史Oee.toFixed(1))
-                this.History.push(res.data[0].历史Teep.toFixed(1))
-                this.Reality.push(res.data[0].当日Oee.toFixed(1))
-                this.Reality.push(res.data[0].当日Teep.toFixed(1))
-                console.log(this.History,this.Reality)
-                this.initChart1(this.History, this.Target, this.Reality)
-            })
+            
             // this.$forceUpdate()
             this.timer = window.setInterval(() => {
                 //获取设备异常工艺参数列表(用于综合看板--工艺参数监控)
                 if(this.$route.params.WorkShopGUID != 0) {
                     this.$axios.post('/JLDPWebApi/Api/Ecinfo/GetMachineErrorParameter').then(res => {
                         this.$message.closeAll()
-                        console.log(JSON.parse(res.data))
+                        // console.log(JSON.parse(res.data))
                         this.ProcessParameters = JSON.parse(res.data)
                         if(this.ProcessParametersPages.length>=2){
                             this.$nextTick(() => {
@@ -733,7 +742,7 @@ import { setTimeout, setInterval } from 'timers';
                         this.PlatoPercent = []
                         this.computedPlato = []
                         this.PlatoPercentN = []
-                        console.log('质量柏拉图', res.data)
+                        // console.log('质量柏拉图', res.data)
                         res.data.forEach((item, index) => {
                             this.PlatoName.push(item.缺陷定义名称)
                             this.PlatoQuantity.push(item.数量)
@@ -752,6 +761,7 @@ import { setTimeout, setInterval } from 'timers';
                         }
                         // console.log('dasdsadsada',this.computedPlato)
                         this.initChart3(this.PlatoName, this.PlatoQuantity, this.computedPlato, this.Max)
+                        this.$forceUpdate()
                         // console.log(this.PlatoName, this.PlatoQuantity, this.PlatoPercent)
                     })
                 }
@@ -760,7 +770,7 @@ import { setTimeout, setInterval } from 'timers';
                     WorshopGuid:WORKSHOP
                 }).then(res => {
                     this.$message.closeAll()
-                    console.log(res.data)
+                    // console.log(res.data)
                     this.EquipmentNo = []
                     this.EquipmentNormal = []
                     this.EquipmentFailure = []
@@ -770,10 +780,11 @@ import { setTimeout, setInterval } from 'timers';
                     this.EquipmentNoNum = res.data[0].数量
                     this.EquipmentNormalNum = res.data[1].数量
                     this.EquipmentFailureNum = res.data[2].数量
-                    this.EquipmentNo = Math.round(res.data[0].百分比)
+                    this.EquipmentNo = Math.round(res.data[0].百分比)+Math.round(res.data[1].百分比) >100 ?Math.round(res.data[0].百分比)-1:Math.round(res.data[0].百分比)
                     this.EquipmentNormal = Math.round(res.data[1].百分比)
                     this.EquipmentFailure = res.data[0].百分比 ==0 && res.data[1].百分比 ==0 && res.data[2].百分比 ==0 ? 0:100-this.EquipmentNormal-this.EquipmentNo
                     this.initChart2(this.EquipmentNo, this.EquipmentNormal, this.EquipmentFailure)
+                     this.$forceUpdate()
                 })
                 //获取指定车间下产线的应上岗工位数和已上岗工位数(用于综合看板--岗位实时状态)
                 this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkcenterPostRealtimeState',{
@@ -800,30 +811,32 @@ import { setTimeout, setInterval } from 'timers';
                     })
                 })
                 //获取指定车间目标oee平均值和目标teep平均值(用于综合看板--设备效率OEE&产能利用率TEEP)
+                //获取指定车间实际oee平均值和实际teep平均值(用于综合看板--设备效率OEE&产能利用率TEEP)
                 this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkshopTargetOeeAndTeep',{
                     WorshopGuid:WORKSHOP 
                 }).then(res => {
+                    // console.log(res.data[0].目标TEEP)
                     this.$message.closeAll()
-                    // console.log(res.data)
                     this.Target = []
-                    this.Target.push(res.data[0].目标OEE.toFixed(1))
-                    this.Target.push(res.data[0].目标TEEP.toFixed(1))
-                    console.log(this.Target)
-                    this.initChart1(this.History, this.Target, this.Reality)
-                })
-                //获取指定车间实际oee平均值和实际teep平均值(用于综合看板--设备效率OEE&产能利用率TEEP)
-                this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkshopRealtimeOeeAndTeep',{
-                    WorshopGuid:WORKSHOP 
-                }).then(res => {
-                    this.$message.closeAll()
-                    this.History = []
-                    this.Reality = []
-                    this.History.push(res.data[0].历史Oee.toFixed(1))
-                    this.History.push(res.data[0].历史Teep.toFixed(1))
-                    this.Reality.push(res.data[0].当日Oee.toFixed(1))
-                    this.Reality.push(res.data[0].当日Teep.toFixed(1))
-                    console.log(this.History,this.Reality)
-                    this.initChart1(this.History, this.Target, this.Reality)
+                    this.Target.push(res.data[0].目标OEE != null?res.data[0].目标OEE.toFixed(1):0.0.toFixed(1))
+                    this.Target.push(res.data[0].目标TEEP != null?res.data[0].目标TEEP.toFixed(1):0.0.toFixed(1))
+                    console.log('目标',this.Target)
+                    this.$axios.post('/JLDPWebApi/Api/Bsworkcenter/GetWorkshopRealtimeOeeAndTeep',{
+                        WorshopGuid:WORKSHOP 
+                    }).then(res => {
+                        console.log('实际',res)
+                        this.$message.closeAll()
+                        // console.log('OEE',res.data)
+                        this.History = []
+                        this.Reality = []
+                        this.History.push(res.data[0].历史Oee != null?res.data[0].历史Oee.toFixed(1):0.0.toFixed(1))
+                        this.History.push(res.data[0].历史Teep != null?res.data[0].历史Teep.toFixed(1):0.0.toFixed(1))
+                        this.Reality.push(res.data[0].当日Oee != null?res.data[0].当日Oee.toFixed(1):0.0.toFixed(1))
+                        this.Reality.push(res.data[0].当日Teep != null?res.data[0].当日Teep.toFixed(1):0.0.toFixed(1))
+                        this.initChart1(this.History, this.Target, this.Reality)
+                        this.$forceUpdate()
+                    })
+                    // this.initChart1(this.History, this.Target, this.Reality)
                 })
             }, 60000)
             this.$emit('canceltimer',this.timer)
@@ -857,7 +870,7 @@ import { setTimeout, setInterval } from 'timers';
                 &:nth-child(1) 
                     position relative
                     .title
-                        font-size .32rem
+                        font-size .34rem
                         color #fff
                         padding-left .41rem
                         padding-top .45rem
@@ -892,6 +905,7 @@ import { setTimeout, setInterval } from 'timers';
                 &:nth-child(2)
                     position relative
                     width 6.6rem
+                    border-right 0
                     .title
                         font-size .32rem
                         color #fff
@@ -932,14 +946,16 @@ import { setTimeout, setInterval } from 'timers';
                                 span 
                                     display block
                                     &:first-child
-                                        font-size .24rem
+                                        font-size .26rem
                                     &:last-child
-                                        font-size .16rem
+                                        font-size .18rem
                             .number 
-                                font-size .48rem
+                                font-size .5rem
                                 padding-left .22rem
                 &:nth-child(3)
                     width 6.2rem
+                    height 200%
+                    border-left .01rem solid rgba(125, 170,  255, .4)
                     .title
                         font-size .32rem
                         color #fff
@@ -950,18 +966,18 @@ import { setTimeout, setInterval } from 'timers';
                             padding-left .16rem  
                     .jobStatus
                         width 100%
-                        height 4.64rem
+                        height 9.5rem
                         .swiper-wrapper
                             height 100%
                             ul 
                                 height 100%
                                 li
-                                    height 30%
+                                    height 17%
                                     padding-top .32rem
                                     padding-left .41rem
                                     position relative
                                     p
-                                        font-size .24rem
+                                        font-size .26rem
                                         color #fff 
                                     .bd
                                         width .14rem
@@ -981,7 +997,7 @@ import { setTimeout, setInterval } from 'timers';
                                             left .84rem
                                     .shouldUp, .haveUp
                                         color #fff
-                                        font-size .2rem
+                                        font-size .22rem
                                         position absolute
                                         .totalMember, .comeMember
                                             display inline-block
@@ -1000,15 +1016,19 @@ import { setTimeout, setInterval } from 'timers';
                                             background linear-gradient(270deg,rgba(247,121,25,1),rgba(249,171,105,1));
                                             border-radius .07rem          
         .realTimeStatus-Bottom
-            width 100%
+            width 50%
             height 50%
-            border-top .01rem solid rgba(125, 170,  255, .4)
+            position relative
+            // border-top .01rem solid rgba(125, 170,  255, .4)
             .qualityPlato
                 float left
-                width 11rem
+                width 13rem
                 height 100%
-                border-right .01rem solid rgba(125, 170,  255, .4)
-                position relative
+                // border-right .01rem solid rgba(125, 170,  255, .4)
+                border-top .01rem solid rgba(125, 170,  255, .4)
+                position absolute
+                left 0
+                top 0
                 .title
                     font-size .32rem
                     color #fff
@@ -1021,7 +1041,7 @@ import { setTimeout, setInterval } from 'timers';
                     position absolute 
                     left 0
                     bottom 0
-                    width 10.99rem
+                    width 100%
                     height 4.6rem
             .paramsWatch
                 float left

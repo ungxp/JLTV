@@ -382,7 +382,7 @@ export default {
     top 0
     left 0
     .txtDistribution
-      font-size .32rem
+      font-size .34rem
       color rgba(217,239,255,1)
       position absolute
       left .41rem
@@ -435,7 +435,7 @@ export default {
                 width 3.44rem
                 height 1.92rem
               .num
-                font-size .31rem
+                font-size .33rem
                 color #fff
                 font-weight 500
                 position absolute
@@ -443,7 +443,7 @@ export default {
                 top .28rem
                 font-family 'PingFang-SC-Medium'
               .orderNum
-                font-size .15rem
+                font-size .17rem
                 color rgba(198,213,253,1)
                 font-weight 500
                 position absolute
@@ -451,7 +451,7 @@ export default {
                 top .39rem
                 font-family 'PingFang-SC-Medium'
               .type
-                font-size .22rem
+                font-size .24rem
                 color rgba(198,213,253,1)
                 font-weight 500
                 position absolute
@@ -465,7 +465,7 @@ export default {
     top 7.48rem
     left 0
     .txtTrend
-      font-size .32rem
+      font-size .34rem
       color rgba(217,239,255,1)
       position absolute
       left .43rem
@@ -503,7 +503,7 @@ export default {
       top .37rem
       font-family 'PingFang-SC-Bold'
       font-weight bold
-      font-size .32rem
+      font-size .34rem
       color rgba(217,239,255,1)
     .enProgress
       position absolute
@@ -539,7 +539,7 @@ export default {
               top .15rem
               font-family 'PingFang-SC-Regular'
               font-weight 100
-              font-size .16rem
+              font-size .18rem
               color rgba(198,213,253,1)
               line-height .24rem
             .orderId1
@@ -548,7 +548,7 @@ export default {
               bottom .7rem
               font-family 'PingFang-SC-Medium'
               font-weight 100
-              font-size .16rem
+              font-size .18rem
               color #fff
               line-height .24rem
             .productId
@@ -557,7 +557,7 @@ export default {
               top .68rem
               font-family 'PingFang-SC-Regular'
               font-weight 100
-              font-size .16rem
+              font-size .18rem
               color rgba(198,213,253,1)
               line-height .24rem
             .productId1
@@ -566,7 +566,7 @@ export default {
               bottom .18rem
               font-family 'PingFang-SC-Medium'
               font-weight 100
-              font-size .16rem
+              font-size .18rem
               color #fff
               line-height .24rem
             .verticalLine2
@@ -647,14 +647,14 @@ export default {
                 margin-left auto
                 margin-right auto
               .min
-                font-size .18rem
+                font-size .2rem
                 color rgba(198,213,253,1)
                 font-weight 400
                 position absolute
                 left 0
                 top -.18rem
               .max
-                font-size .18rem
+                font-size .2rem
                 color rgba(198,213,253,1)
                 font-weight 400
                 position absolute

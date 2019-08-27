@@ -5,10 +5,11 @@
       <img :src="'data:image/png;base64,'+picBase64" alt="左边看板区" class="left_bg">
       <!-- 闪烁图标 -->
       <!-- <div class="blink"> -->
-      <div class="swiper-container"  v-for="(swiper1, index) in getSwiper" :key="index" :style="`position:absolute;left:${14.19*(swiper1[0].X坐标)/bgWidth}rem;top:${10.12*(swiper1[0].Y坐标)/bgHeight}rem;width:${swiper1[0].控件宽/100*3}rem;height:${swiper1[0].控件高/100*3}rem`" >
+      <div :class="`swiper-container${index}`"  v-for="(swiper1, index) in getSwiper" :key="index" :style="`position:absolute;left:${14.19*(swiper1[0].X坐标)/bgWidth}rem;top:${10.12*(swiper1[0].Y坐标)/bgHeight}rem;width:${swiper1[0].控件宽/100*3}rem;height:${swiper1[0].控件高/100*3}rem`" class="swiper-container" >
+      <!-- 位置变了 -->
         <div class="swiper-wrapper" :style="`width:${swiper1[0].控件宽/100*3}rem;height:${swiper1[0].控件高/100*3}rem`">
           <div class="swiper-slide"  v-for="(item) in swiper1" :key="item.GUID" :style="`width:${item.控件宽/100*3}rem;height:${item.控件高/100*3}rem`">
-            <img :src="'data:image/png;base64,'+item.Andon看板闪烁图片" alt="闪烁" class="iconPosition" :style="`width:${item.控件宽/100*3}rem;height:${item.控件高/100*3}rem`">
+            <img :src="'data:image/png;base64,'+item.Andon看板闪烁图片" alt="闪烁" :class="{'iconPosition':isA}" :style="`width:${item.控件宽/100*3}rem;height:${item.控件高/100*3}rem`" class="icon">
           </div>
         </div>
       </div>
@@ -20,7 +21,7 @@
         <img src="../../assets/images/logo.png" alt="商标" class="logo">
       </div>
       <!-- 右边轮播 -->
-      <div class="swiper-container swiper-containerA">
+      <div class="swiper-container">
         <div class="swiper-wrapper">
           <div class="swiper-slide" v-for="(page, index) in andonpages" :key="index">
             <!-- 一个安灯类别框 -->
@@ -52,7 +53,8 @@ import { resolve } from 'url';
 import {Base64} from 'js-base64';
 // import md5 from 'js-md5';
 import Swiper from 'swiper'
-import { setInterval, setTimeout } from 'timers';
+import { setInterval, setTimeout, clearInterval } from 'timers';
+import { constants } from 'fs';
 export default {
   data(){
     return{
@@ -71,23 +73,27 @@ export default {
       andonBigList: [],//处理后右边安灯大数组
       leftAndonList:[],//左侧闪烁安灯详细列表
       swiperA:'',
+      swiper2:'',
+      isA:true,
+      timer:'',
       TypeInformation: [],
       bgWidth:0,//背景实际宽
       bgHeight:0,//背景实际高
       getSwiper:[],//获取闪烁图表轮播
-      // myswiper:[],
+      myswiper:[],
+      //原TypeInformation
       //测试
       ceshinub:1,
-      //字符串的TypeInformation，为了监控变化
       oldTypeInformation:[],
-      //获取安灯guid和数量数组
-      oldCountGroupbyType:[],
-      timer:'',
+      //原CountGroupbyType
+      oldCountGroupbyType:[]
+      // count: 0,
+      // msg: ""
     }
   },
   
   activated() {
-        localStorage.setItem('NowPage',this.$route.path)        
+    localStorage.setItem('NowPage',this.$route.path)        
         const that=this    
         // console.log(this.leftAndonList)
         window.addEventListener('offline',  function() {
@@ -100,54 +106,68 @@ export default {
         window.addEventListener('online',  function() {
             that.$message.closeAll()      
         })
-    
+       
     this.getAndonMonitoryPointBackgroundImage()//获取Andon监控点背景图(用于Andon看板)
     this.getAndonTypeInformation(this.AndonType)//处理后右边安灯大数组
     setInterval(() => {
       clearInterval(this.timer)
-      this.AndonType = []
-      this.getSwiper = []
+      this.AndonType = [];
+      this.getSwiper=[]
+      // this.count++;
+      // if(this.count % 2 == 0)
+      //   this.msg = "1"
+      //   else this.msg = ""
       this.TypeInformation.forEach((item, index) => {
           this.AndonType.push({GUID:item.Andon类别Guid, AndonTypeName:item.Andon类别名称, AndonTypeEName:item.Andon类别英文名称, HashCodeB:item.Andon看板标识图片哈希码, HashCodeC:item.Andon看板闪烁图片哈希码})
       })
       this.getAndonMonitoryPointBackgroundImage()//获取Andon监控点背景图(用于Andon看板)
       this.getAndonTypeInformation(this.AndonType)//处理后右边安灯大数组
     }, 60000)
+    // //console.log(this.leftAndonList)
+    // img[0].onload = function()
+    // {
+        // var width = this.naturalWidth;
+        // this.$nextTick(()=>{
+          // //console.log(img[0].naturalWidth)
+        // })
+        
+    // }
   },
   watch:{
       'oldCountGroupbyType':{
         handler(newValue, oldValue) {
           var andonchange = 0
           var guidchange=0
-        if(newValue.length!=0){
-          newValue.forEach((item,index)=>{
-            oldValue.forEach((it,ind)=>{
-              if(item.GUID==it.GUID){
-                guidchange++
-                if (it.数量< item.数量) {
-                  andonchange++
-                  console.log('andonchange',andonchange)
+          if(newValue.length!=0){
+            newValue.forEach((item,index)=>{
+              
+              oldValue.forEach((it,ind)=>{
+                if(item.GUID==it.GUID){
+                  guidchange++
+                  if (it.数量< item.数量) {
+                      andonchange++
+                      console.log('andonchange',andonchange)
+                  }
                 }
-              }
+              })
             })
-          })
-          if(guidchange!=newValue.length){
-            andonchange++
+            if(guidchange!=newValue.length){
+              andonchange++
+            }
           }
-        }
-        if(andonchange!= 0) {
-          this.ceshinub++
-          let audio = document.getElementById('myAudio')
-          audio.load()//重新加载，从头播放
-          audio.play()//开始播放
-        }
+          if(andonchange!= 0) {
+            this.ceshinub++
+            let audio = document.getElementById('myAudio')
+            audio.load()//重新加载，从头播放
+            audio.play()//开始播放
+          }
         },
         deep: true
       },
-      'ceshinub': function(newValue,oldValue) {
+       'ceshinub': function(newValue,oldValue) {
         this.$emit('getAndonData',newValue)
       }
-  },
+    },
   computed: {
     //计算右侧安灯轮播页大数组
     andonpages(){
@@ -169,15 +189,14 @@ export default {
         HashCode:this.HashCode//将data中的哈希赋值给HashCode参数
       }).then(res => {
         this.$message.closeAll()
-        // // console.log(res)
+        // // //console.log(res)
         if(res.data!=0){//如果上一次返回0，即图片没有变化，或第一次申请，就将新获取到的哈希值赋值给this，防止出现背景图片时有时无的现象
           var data=JSON.parse(res.data)
-          // console.log('背景图片',data)
+          // // //console.log('背景图片',data)
           this.HashCode=data.HashCode//获取哈希值并赋值给data中的HashCode
           this.picBase64=data.PicBase64//获取图片base64编码
         }
-        this.$forceUpdate()
-        // // console.log('背景',res)
+        // // //console.log('背景',res)
       }).catch((error) => {
                     // // console.log(error.message)
                     if(error.message && error.message == 'Network Error') {
@@ -196,22 +215,23 @@ export default {
       // this.$axios.post('http://192.168.100.15/JLDPWebApi/Api/Andon/GetAndonCountGroupbyType',{
       //   MonitoryPointGuid: '1edcdbda-359e-475d-b4c6-fadf4ea7b255'//监控点Guid
       // }).then(res=>{
-      //   // console.log(111,res)
+      //   // //console.log(111,res)
       // })
+      // // //console.log("data:", data);
       this.$axios.post('/JLDPWebApi/Api/AdType/GetAndonTypeInformation',{
         MonitoryPointGuid: this.$route.params.watchPoint,//监控点Guid
         Data:data
       }).then(resTypeInformation => {
         this.$message.closeAll()
-        // console.log(resTypeInformation)
+        // // //console.log('是否有新数据',resTypeInformation)
         if(JSON.parse(resTypeInformation.data)[0].Result != 0){
-          // console.log('获取Andon类别信息',JSON.parse(JSON.parse(resTypeInformation.data)[0].Data))
+          // // //console.log('获取Andon类别信息',JSON.parse(JSON.parse(resTypeInformation.data)[0].Data))
           //获取的安灯类别信息
           this.TypeInformation = JSON.parse(JSON.parse(resTypeInformation.data)[0].Data)
+          this.oldTypeInformation = JSON.parse(JSON.parse(resTypeInformation.data)[0].Data)
+          // // //console.log('获取Andon类别信息11111', this.TypeInformation)
 
-          // console.log('获取Andon类别信息11111', this.TypeInformation)
-
-          // console.log(JSON.parse(resTypeInformation.data)[0])
+          // // //console.log(JSON.parse(resTypeInformation.data)[0])
         }
         
         //如果上一次返回0，即图片没有变化，或第一次申请，就将新获取到的哈希值赋值给this，防止出现图片时有时无的现象
@@ -223,10 +243,10 @@ export default {
         this.$axios.post('/JLDPWebApi/Api/Andon/GetAndonCountGroupbyType',{
           MonitoryPointGuid: this.$route.params.watchPoint//监控点Guid
         }).then(resCountGroupbyType=>{
-          // console.log('获取安灯数量',resCountGroupbyType)
+          // // //console.log('获取安灯数量',resCountGroupbyType)
           //获取的安灯数量
           this.oldCountGroupbyType = resCountGroupbyType.data
-          console.log('安灯数量',this.oldCountGroupbyType)
+          // console.log('oldCountGroupbyType',this.oldCountGroupbyType)
           var CountGroupbyType = resCountGroupbyType.data
           this.TypeInformation.forEach((item, index) => {
             var a = 0
@@ -245,55 +265,59 @@ export default {
               })
             }
           })
-          this.oldTypeInformation = JSON.stringify(this.TypeInformation)
+          this.oldTypeInformation=JSON.stringify(this.TypeInformation)
           this.andonBigList = this.TypeInformation
-          // console.log('andonBigList',this.andonBigList)
-          // console.log('几页', this.andonpages)
-          if(this.swiperA && this.andonpages.length<2) {
-            this.swiperA.destroy()
-            this.$forceUpdate()
-            this.swiperA = ''
-          }
-          if(this.andonpages.length>1) {
-            this.$nextTick(() => {//滚动效果
-              if(this.swiperA) {
-                this.swiperA.update(false)
-              }else if(this.andonpages.length>=2){
-                var myswiper = new Swiper('.swiper-containerA',{
-                    loop: false,
-                    autoplay: {
-                      delay: 15000,
-                      reverseDirection: false,
-                      disableOnInteraction:false
-                    },
-                    // direction: 'vertical',
-                    observer:true,
-                    observeParents:true
-                  })
-                this.swiperA = myswiper
+          // //console.log(this.andonBigList)
+          // //console.log('andonBigList',this.andonBigList)
+          this.$forceUpdate()
+          this.$nextTick(() => {//滚动效果
+            if(this.swiperA) {
+              if(this.andonpages.length>=2){
+                 this.swiperA.update(false)
+              }else {
+                 this.swiperA.destroy()
+                 this.$forceUpdate()
+                 this.swiperA = ''
               }
-            })
-            this.$forceUpdate()
-          }
+            }else if(this.andonpages.length>=2){
+              var myswiper = new Swiper('.swiper-container',{
+                  loop: false,
+                  autoplay: {
+                    delay: 15000,
+                    reverseDirection: false,
+                    disableOnInteraction:false
+                  },
+                  // direction: 'vertical',
+                  observer:true,
+                  observeParents:true,
+                  onSlideChangeEnd: function(swiper){ 
+              　　　swiper.update();  
+              　　　myswiper.startAutoplay();
+              　　  myswiper.reLoop();
+                  }
+                })
+              this.swiperA = myswiper
+            }
+          })
           
         })
         //得到Andon列表(用于Andon看板)
         this.$axios.post('/JLDPWebApi/Api/Andon/GetAndon',{
           MonitoryPointGuid: this.$route.params.watchPoint//监控点Guid
         }).then(resAndon=>{ 
-          // console.log('resandon',resAndon)
-          // console.log('获取Andon列表:',resAndon.data)
+          // // //console.log('resandon',resAndon)
+          // // //console.log('获取Andon列表:',resAndon.data)
           var andon = resAndon.data
           this.$axios.post('/JLDPWebApi/Api/Andon/GetAndonMonitoryPointLocation',{
             MonitoryPointGuid: this.$route.params.watchPoint//监控点Guid
           }).then(resPointLocation => {
             var PointLocation = JSON.parse(resPointLocation.data)
-            // console.log('resPointLocation',JSON.parse(resPointLocation.data))
+            // //console.log('resPointLocation',JSON.parse(resPointLocation.data))
             this.bgWidth=PointLocation.Width
             this.bgHeight=PointLocation.Height
-            // console.log(this.bgWidth,this.bgHeight)
-            // // console.log(data)
-            // console.log('获取监控点分布图',PointLocation)
+            // //console.log(this.bgWidth,this.bgHeight)
+            // // //console.log(data)
+            // //console.log('获取监控点分布图',PointLocation)
             //安灯列表遍历
             andon.forEach((item, index) => {
               //安灯类别信息遍历
@@ -313,9 +337,9 @@ export default {
                 }
               })
             })
-            // // console.log('typeinformation',this.TypeInformation)
+            // // //console.log('typeinformation',this.TypeInformation)
             this.leftAndonList = andon
-            // console.log('左侧安灯列表',this.leftAndonList)
+            // //console.log('左侧安灯列表',this.leftAndonList)
             var j=-1//总共有几个小数组
             var arr=[]//大数组
             var [ ...arr2 ] = andon
@@ -343,49 +367,79 @@ export default {
                 arr.splice(i,1)
               }
             }
-            // console.log('arr',arr)
-            // console.log('arr的长度',arr[0])
+            // //console.log('arr',arr)
+            // //console.log('arr的长度',arr[0])
             this.getSwiper=arr
+            //console.log('初始',this.getSwiper)
+            // clearInterval(timer)
+            // //console.log('timer',timer)
             this.timer = setInterval(() =>{
               this.getSwiper.forEach((item, index) => {
-              // item.forEach(() => {
-              // var andengfirst = item.shift()
-              item.push(item.shift())
-              // })
+                // item.forEach(() => {
+                  // var andengfirst = item.shift()
+                  item.push(item.shift())
+                // })
               })
-              // console.log('30后',this.getSwiper)
+              //console.log('30后',this.getSwiper)
             }, 3000)
-            // var that=this
+            //console.log('左侧灯',this.getSwiper)
+            var that=this
             // arr.forEach((item,index)=>{
+            //   // this.getSwiper=arr
+            //   // if(this.swiper2) {
+            //   //   this.swiper2.update(false)
+            //   // }else {
             //     this.$nextTick(() => {
-            //         if(that.myswiper[index]){
-            //           that.myswiper[index].autoplay.stop()
+            //         if(that.myswiper[index]){//这里改过
+            //           // //console.log(22)
+            //           that.myswiper[index].autoplay.stop()//这两句是为了防止多个定时器出现轮播混乱的问题
             //           that.myswiper[index].autoplay.start()
-            //           this.$forceUpdate()
             //         }else{
-            //           // console.log(11)
+            //           // //console.log(11)
             //           var mySwiper=new Swiper('.swiper-container'+index,{
-            //             setWrapperSize :true,
-            //             loop: false,
+            //             loop: true,//防止出现重复页面，因为如果为true，swiper会将收尾复制一份，如果轮播速度出错，就会有重复页，如果是滑动就会一下子滑到第一面，但因为是fade就看不出来
+            //             // virtual:true,
+            //             // speed:800,
+            //             setWrapperSize :true,//兼容对flexbox兼容性不好的浏览器
+            //             // slidesPerView: "auto",
             //             autoplay: {
-            //               delay: 2700,
-            //               reverseDirection: false,
-            //               disableOnInteraction:false
+            //               delay: 2700,//这里改过
+            //               reverseDirection: false,//是否允许反向滑动
+            //               disableOnInteraction:false//当用户手动滑动轮播时，是否允许重新开始轮播，false为允许
             //             },
-            //             observer:true,
+            //             // on:{
+            //             //   slideChangeTransitionStart: function(){
+            //             //     that.isA=false
+            //             //     //console.log('end')
+            //             //     // that.isA=true
+            //             //     // //console.log('start')
+            //             //   },
+            //             //   slideChangeTransitionEnd: function(){
+            //             //     // //console.log('end')
+            //             //     // that.isA=false
+            //             //     //console.log('start')
+            //             //     that.isA=true
+            //             //   },
+                          
+            //             // },
+            //             // direction: 'vertical',
+            //             observer:true,//这两句与更新有关
             //             observeParents:true,
-            //             effect:'fade',
+            //             effect:'fade',//淡入
             //             fadeEffect:{
             //               crossFade:true
             //             }
             //           })
             //           that.myswiper[index]=mySwiper
-            //           this.$forceUpdate()
             //         }
+            //   // // //console.log('轮播速度',a)
             //     })
+                
+            //   //   this.swiper2 = myswiper2
+            //   // }
             // })
-            // // console.log('myswiper',this.myswiper)
-            // // console.log('闪烁图标轮播',this.getSwiper)
+            // //console.log('myswiper',this.myswiper)
+            // //console.log('闪烁图标轮播',this.getSwiper)
           })
         })
       })
@@ -413,15 +467,19 @@ export default {
     .swiper-container
       .swiper-wrapper
         .swiper-slide
+          .icon
+            // opacity 0
           .iconPosition
             @keyframes mymove{
               from { opacity: 0; } /* 动画开始时的不透明度 */
-              30% { opacity: 1; } /* 动画30% 时的不透明度 */
-              50% { opacity: 1; }
-              70% { opacity: 1; }
-              to { opacity: 0; }
+              30%  { opacity: 1; } /* 动画30% 时的不透明度 */
+              50%  { opacity: 1; }
+              70%  { opacity: 1; }
+              to   { opacity: 0; }
             }
             animation mymove ease 3s infinite
+            // animation-delay 0.1s
+            // display block
   .right
     width 4.65rem
     height 100%
@@ -482,7 +540,7 @@ export default {
               font-weight 500
               // float left
               // margin-top -.25rem
-              // margin-left 32rem
+              // margin-left 1.82rem
               position absolute
               left 1.82rem
               top .73rem

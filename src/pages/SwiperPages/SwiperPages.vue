@@ -8,7 +8,7 @@
         </div>
     </div> -->
     <div class="swiper">
-        <el-carousel :interval="10000"  ref="carousel" indicator-position="none" :autoplay='autoplayFlag'>
+        <el-carousel :interval="switchTime"  ref="carousel" indicator-position="none" :autoplay='autoplayFlag'>
             <el-carousel-item v-if="this.$route.params.choosedTVboardList.includes(0)" name="ChassisPage">
                 <ChassisPage class="swiper-slide" @getAndonData = 'getAndonData'></ChassisPage>  
             </el-carousel-item>
@@ -39,7 +39,8 @@ import { setTimeout } from 'timers';
                 Andon:'',
                 autoplayFlag:true,
                 index:-1,
-                timer: ''
+                timer: '',
+                switchTime:0,//页面切换时间间隔
             }
         },
         components: {
@@ -63,6 +64,7 @@ import { setTimeout } from 'timers';
             //跳转到首页
             gotohomePage() {
                 this.$router.push({name:'homePage'})
+                this.index = -1
             }
         },
         watch:{
@@ -93,7 +95,13 @@ import { setTimeout } from 'timers';
             //         observeParents:true
             //     })
             // })
-            
+            //获取看板切换时间
+            this.$axios.post('/JLDPWebApi/api/MCorder/GetKANBANSWITCHTIME').then(res => {
+                console.log('切换时间',res)
+                this.switchTime = res.data*1000
+                console.log('切换时间毫秒',this.switchTime)
+
+            })
         },
         beforeRouteLeave (to, from, next) {
             if(this.timer) {

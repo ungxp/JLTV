@@ -52,7 +52,7 @@ export async  function checkVersion(type){
 
     var host = localStorage["host"]
 
-
+    console.log('localhost',host)
     var jsMemory = performance.memory;
     // bugout.log("Get memory by js performance.memory... usedJSHeapSize:" + Math.round(jsMemory.usedJSHeapSize /1048576) + "MB" + 
     // ",  jsHeapSizeLimit:" + Math.round(jsMemory.jsHeapSizeLimit /1048576) + "MB" + 
@@ -64,7 +64,7 @@ export async  function checkVersion(type){
     async function plusReady(){
         // bugout.log("plus ready.")  
 
-
+        console.log('进来了')
         var Context = plus.android.importClass("android.content.Context");
         var ActivityManager = plus.android.importClass("android.app.ActivityManager");
         var mi = new ActivityManager.MemoryInfo();
@@ -78,12 +78,15 @@ export async  function checkVersion(type){
         // if(window.isFetchingNewVersion != undefined && window.isFetchingNewVersion == true)
         //     return;
         window.isFetchingNewVersion = true;
-
+        console.log('111')
         let res = await fetch(`${host}/JLDPWebApi/api/ClientVersion/GetLatestVersionForTV`)
+        console.log('新版本',res)
         let data = await res.json();
+        console.log('新版本1',data)
         var newVersion = data;
         // alert(newVersion);
         // bugout.log("寻找新版本...")
+        console.log('不同版本',newVersion,localStorage["localVersion"])
         if(newVersion != localStorage["localVersion"])
         {
             // if(window.wsocket == null)
@@ -120,6 +123,7 @@ export async  function checkVersion(type){
             // 下载wgt文件
             var wgtUrl=`${host}/JLDPWebApi/` + filesData;
             // alert(wgtUrl);
+            console.log('wgtUrl',wgtUrl)
             downloadWgt();
             function downloadWgt(){
                 plus.io.resolveLocalFileSystemURL("_doc/update",function(entry){
