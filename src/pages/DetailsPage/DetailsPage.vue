@@ -118,8 +118,10 @@ export default {
             }).catch((error) => {
                     // console.log(error.message)
                     if(error.message && error.message == 'Network Error') {
+                      this.$message.closeAll()
                         this.$message.error('请求已超时')             
                     }else if (error.response && error.response.data == '网络已断开' && error.response.status == 502) {
+                        this.$message.closeAll()
                         this.$message({
                             message: '服务已断开',
                             type: 'error',
@@ -294,16 +296,6 @@ export default {
     activated(){
       localStorage.setItem('NowPage',this.$route.path)
       const that = this
-      window.addEventListener('offline',  function() {
-          that.$message({
-              message: '与服务器连接中断，正在尝试重连中...',
-              type: 'error',
-              duration: 0
-          })      
-      })
-      window.addEventListener('online',  function() {
-          that.$message.closeAll()      
-      })
       this.getOrderDistribution('/JLDPWebApi/Api/Mcorder/GetProductionProgress','/JLDPWebApi/Api/Mcbarcode/GetProductionTrend','/JLDPWebApi/Api/Mcorder/GetOrderDistribution')
       var timer1 = window.setInterval(()=>{
         that.getOrderDistribution('/JLDPWebApi/Api/Mcorder/GetProductionProgress','/JLDPWebApi/Api/Mcbarcode/GetProductionTrend','/JLDPWebApi/Api/Mcorder/GetOrderDistribution')

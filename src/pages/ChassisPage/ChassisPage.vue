@@ -96,17 +96,6 @@ export default {
     localStorage.setItem('NowPage',this.$route.path)        
         const that=this    
         // console.log(this.leftAndonList)
-        window.addEventListener('offline',  function() {
-            that.$message({
-                message: '与服务器连接中断，正在尝试重连中...',
-                type: 'error',
-                duration: 0
-            })      
-        })
-        window.addEventListener('online',  function() {
-            that.$message.closeAll()      
-        })
-       
     this.getAndonMonitoryPointBackgroundImage()//获取Andon监控点背景图(用于Andon看板)
     this.getAndonTypeInformation(this.AndonType)//处理后右边安灯大数组
     setInterval(() => {
@@ -200,8 +189,10 @@ export default {
       }).catch((error) => {
                     // // console.log(error.message)
                     if(error.message && error.message == 'Network Error') {
+                        this.$message.closeAll()
                         this.$message.error('请求已超时')             
                     }else if (error.response && error.response.data == '网络已断开' && error.response.status == 502) {
+                        this.$message.closeAll()
                         this.$message({
                             message: '服务已断开',
                             type: 'error',

@@ -523,16 +523,6 @@ import { setTimeout, setInterval } from 'timers';
             localStorage.setItem('NowPage',this.$route.path)
             // console.log(this.$route.path)
             const that = this
-            window.addEventListener('offline',  function() {
-                that.$message({
-                    message: '与服务器连接中断，正在尝试重连中...',
-                    type: 'error',
-                    duration: 0
-                })        
-            })
-            window.addEventListener('online',  function() {
-                that.$message.closeAll()       
-            })
             // const URL = this.$route.params.url
             const WORKSHOP = this.$route.params.WorkShopGUID
             //为了刷新页面的时候echarts图形不变小
@@ -572,8 +562,10 @@ import { setTimeout, setInterval } from 'timers';
                 }).catch((error) => {
                     // console.log(error.message)
                     if(error.message && error.message == 'Network Error') {
+                        this.$message.closeAll()
                         this.$message.error('请求已超时')             
                     }else if (error.response && error.response.data == '网络已断开' && error.response.status == 502) {
+                        this.$message.closeAll()
                         this.$message({
                             message: '服务已断开',
                             type: 'error',
@@ -723,8 +715,10 @@ import { setTimeout, setInterval } from 'timers';
                     }).catch((error) => {
                     // console.log(error.message)
                     if(error.message && error.message == 'Network Error') {
+                        this.$message.closeAll()
                         this.$message.error('请求已超时')             
                     }else if (error.response && error.response.data == '网络已断开' && error.response.status == 502) {
+                        this.$message.closeAll()
                         this.$message({
                             message: '服务已断开',
                             type: 'error',
@@ -907,7 +901,7 @@ import { setTimeout, setInterval } from 'timers';
                     width 6.6rem
                     border-right 0
                     .title
-                        font-size .32rem
+                        font-size .34rem
                         color #fff
                         padding-left .41rem
                         padding-top .45rem
@@ -957,7 +951,7 @@ import { setTimeout, setInterval } from 'timers';
                     height 200%
                     border-left .01rem solid rgba(125, 170,  255, .4)
                     .title
-                        font-size .32rem
+                        font-size .34rem
                         color #fff
                         padding-left .41rem
                         padding-top .45rem
@@ -1030,7 +1024,7 @@ import { setTimeout, setInterval } from 'timers';
                 left 0
                 top 0
                 .title
-                    font-size .32rem
+                    font-size .34rem
                     color #fff
                     padding-left .41rem
                     padding-top .45rem

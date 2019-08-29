@@ -99,6 +99,7 @@ import { setTimeout } from 'timers';
             this.$axios.post('/JLDPWebApi/api/MCorder/GetKANBANSWITCHTIME').then(res => {
                 console.log('切换时间',res)
                 this.switchTime = res.data*1000
+                this.$forceUpdate() //必须要加这个话，不然重新获取时间后轮播间隔并没改变
                 console.log('切换时间毫秒',this.switchTime)
 
             })
