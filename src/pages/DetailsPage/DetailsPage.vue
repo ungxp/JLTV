@@ -74,7 +74,8 @@ export default {
         orderDistribution:[],
         swiperG:'',
         swiperF:'',
-        Max:0
+        Max:0,
+        timer1:''
       }
     },
     methods:{
@@ -293,11 +294,11 @@ export default {
     // updated(){
 
     // },
-    activated(){
+    mounted(){
       localStorage.setItem('NowPage',this.$route.path)
       const that = this
       this.getOrderDistribution('/JLDPWebApi/Api/Mcorder/GetProductionProgress','/JLDPWebApi/Api/Mcbarcode/GetProductionTrend','/JLDPWebApi/Api/Mcorder/GetOrderDistribution')
-      var timer1 = window.setInterval(()=>{
+      this.timer1 = window.setInterval(()=>{
         that.getOrderDistribution('/JLDPWebApi/Api/Mcorder/GetProductionProgress','/JLDPWebApi/Api/Mcbarcode/GetProductionTrend','/JLDPWebApi/Api/Mcorder/GetOrderDistribution')
       }, 60000);
       // this.$nextTick(()=>{
@@ -339,6 +340,11 @@ export default {
           })
           return pages
         }
+    },
+    beforeDestroy() {
+      if(this.timer1) {
+        window.clearInterval(this.timer1)
+      }
     }
 }
 

@@ -8,7 +8,7 @@
         </div>
     </div> -->
     <div class="swiper">
-        <el-carousel :interval="switchTime"  ref="carousel" indicator-position="none" :autoplay='autoplayFlag'>
+        <el-carousel :interval="this.$route.params.switchTime"  ref="carousel" indicator-position="none" :autoplay='autoplayFlag'>
             <el-carousel-item v-if="this.$route.params.choosedTVboardList.includes(0)" name="ChassisPage">
                 <ChassisPage class="swiper-slide" @getAndonData = 'getAndonData'></ChassisPage>  
             </el-carousel-item>
@@ -40,7 +40,7 @@ import { setTimeout } from 'timers';
                 autoplayFlag:true,
                 index:-1,
                 timer: '',
-                switchTime:0,//页面切换时间间隔
+                // switchTime:0,//页面切换时间间隔
             }
         },
         components: {
@@ -81,7 +81,17 @@ import { setTimeout } from 'timers';
                 console.log('新值',newval)
            } 
         },
-        activated() {
+        created() {
+            //获取看板切换时间
+            // this.$axios.post('/JLDPWebApi/api/MCorder/GetKANBANSWITCHTIME').then(res => {
+            //     console.log('切换时间',res)
+            //     this.switchTime = res.data*1000
+            //     this.$forceUpdate() //必须要加这个话，不然重新获取时间后轮播间隔并没改变
+            //     console.log('切换时间毫秒',this.switchTime)
+
+            // })
+        },
+        mounted() {
             localStorage.setItem('NowPage',this.$route.path)
             console.log('路径',this.$route.path)
             // this.$nextTick(() => {
@@ -96,13 +106,13 @@ import { setTimeout } from 'timers';
             //     })
             // })
             //获取看板切换时间
-            this.$axios.post('/JLDPWebApi/api/MCorder/GetKANBANSWITCHTIME').then(res => {
-                console.log('切换时间',res)
-                this.switchTime = res.data*1000
-                this.$forceUpdate() //必须要加这个话，不然重新获取时间后轮播间隔并没改变
-                console.log('切换时间毫秒',this.switchTime)
+            // this.$axios.post('/JLDPWebApi/api/MCorder/GetKANBANSWITCHTIME').then(res => {
+            //     console.log('切换时间',res)
+            //     this.switchTime = res.data*1000
+            //     this.$forceUpdate() //必须要加这个话，不然重新获取时间后轮播间隔并没改变
+            //     console.log('切换时间毫秒',this.switchTime)
 
-            })
+            // })
         },
         beforeRouteLeave (to, from, next) {
             if(this.timer) {

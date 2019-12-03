@@ -76,6 +76,7 @@ export default {
       swiper2:'',
       isA:true,
       timer:'',
+      timer2:'',
       TypeInformation: [],
       bgWidth:0,//背景实际宽
       bgHeight:0,//背景实际高
@@ -92,13 +93,13 @@ export default {
     }
   },
   
-  activated() {
+  mounted() {
     localStorage.setItem('NowPage',this.$route.path)        
         const that=this    
         // console.log(this.leftAndonList)
     this.getAndonMonitoryPointBackgroundImage()//获取Andon监控点背景图(用于Andon看板)
     this.getAndonTypeInformation(this.AndonType)//处理后右边安灯大数组
-    setInterval(() => {
+    this.timer2 = setInterval(() => {
       clearInterval(this.timer)
       this.AndonType = [];
       this.getSwiper=[]
@@ -296,26 +297,19 @@ export default {
         this.$axios.post('/JLDPWebApi/Api/Andon/GetAndon',{
           MonitoryPointGuid: this.$route.params.watchPoint//监控点Guid
         }).then(resAndon=>{ 
-          // // //console.log('resandon',resAndon)
-          // // //console.log('获取Andon列表:',resAndon.data)
           var andon = resAndon.data
           this.$axios.post('/JLDPWebApi/Api/Andon/GetAndonMonitoryPointLocation',{
             MonitoryPointGuid: this.$route.params.watchPoint//监控点Guid
           }).then(resPointLocation => {
             var PointLocation = JSON.parse(resPointLocation.data)
-            // //console.log('resPointLocation',JSON.parse(resPointLocation.data))
             this.bgWidth=PointLocation.Width
             this.bgHeight=PointLocation.Height
-            // //console.log(this.bgWidth,this.bgHeight)
-            // // //console.log(data)
-            // //console.log('获取监控点分布图',PointLocation)
-            //安灯列表遍历
+            
             andon.forEach((item, index) => {
               //安灯类别信息遍历
               this.TypeInformation.forEach((it, de) => {
                 if(item.Andon类别GUID == it.Andon类别Guid) {
                   item.Andon看板闪烁图片 = it.Andon看板闪烁图片
-                  // item.工位GUID = it.工位GUID
                 }
               })
               //监控点分布遍历
@@ -328,9 +322,7 @@ export default {
                 }
               })
             })
-            // // //console.log('typeinformation',this.TypeInformation)
             this.leftAndonList = andon
-            // //console.log('左侧安灯列表',this.leftAndonList)
             var j=-1//总共有几个小数组
             var arr=[]//大数组
             var [ ...arr2 ] = andon
@@ -358,84 +350,24 @@ export default {
                 arr.splice(i,1)
               }
             }
-            // //console.log('arr',arr)
-            // //console.log('arr的长度',arr[0])
             this.getSwiper=arr
-            //console.log('初始',this.getSwiper)
-            // clearInterval(timer)
-            // //console.log('timer',timer)
             this.timer = setInterval(() =>{
               this.getSwiper.forEach((item, index) => {
-                // item.forEach(() => {
-                  // var andengfirst = item.shift()
-                  item.push(item.shift())
-                // })
-              })
-              //console.log('30后',this.getSwiper)
-            }, 3000)
-            //console.log('左侧灯',this.getSwiper)
-            var that=this
-            // arr.forEach((item,index)=>{
-            //   // this.getSwiper=arr
-            //   // if(this.swiper2) {
-            //   //   this.swiper2.update(false)
-            //   // }else {
-            //     this.$nextTick(() => {
-            //         if(that.myswiper[index]){//这里改过
-            //           // //console.log(22)
-            //           that.myswiper[index].autoplay.stop()//这两句是为了防止多个定时器出现轮播混乱的问题
-            //           that.myswiper[index].autoplay.start()
-            //         }else{
-            //           // //console.log(11)
-            //           var mySwiper=new Swiper('.swiper-container'+index,{
-            //             loop: true,//防止出现重复页面，因为如果为true，swiper会将收尾复制一份，如果轮播速度出错，就会有重复页，如果是滑动就会一下子滑到第一面，但因为是fade就看不出来
-            //             // virtual:true,
-            //             // speed:800,
-            //             setWrapperSize :true,//兼容对flexbox兼容性不好的浏览器
-            //             // slidesPerView: "auto",
-            //             autoplay: {
-            //               delay: 2700,//这里改过
-            //               reverseDirection: false,//是否允许反向滑动
-            //               disableOnInteraction:false//当用户手动滑动轮播时，是否允许重新开始轮播，false为允许
-            //             },
-            //             // on:{
-            //             //   slideChangeTransitionStart: function(){
-            //             //     that.isA=false
-            //             //     //console.log('end')
-            //             //     // that.isA=true
-            //             //     // //console.log('start')
-            //             //   },
-            //             //   slideChangeTransitionEnd: function(){
-            //             //     // //console.log('end')
-            //             //     // that.isA=false
-            //             //     //console.log('start')
-            //             //     that.isA=true
-            //             //   },
-                          
-            //             // },
-            //             // direction: 'vertical',
-            //             observer:true,//这两句与更新有关
-            //             observeParents:true,
-            //             effect:'fade',//淡入
-            //             fadeEffect:{
-            //               crossFade:true
-            //             }
-            //           })
-            //           that.myswiper[index]=mySwiper
-            //         }
-            //   // // //console.log('轮播速度',a)
-            //     })
                 
-            //   //   this.swiper2 = myswiper2
-            //   // }
-            // })
-            // //console.log('myswiper',this.myswiper)
-            // //console.log('闪烁图标轮播',this.getSwiper)
+                  item.push(item.shift())
+              })
+            }, 3000)
+            var that=this
           })
         })
       })
     },  
-  }
+  },
+  beforeDestroy() {
+      if(this.timer2) {
+        clearInterval(this.timer2)
+      }
+    }
 }
 
 </script>

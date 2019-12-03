@@ -78,6 +78,7 @@
                 activateFlag2:false,
                 activateFlag3:false,
                 activateFlag4:false,
+                switchTime:0,//页面切换时间间隔
             }
         },
         created() {
@@ -152,6 +153,7 @@
                         // this.$router.push({name:'ChassisPage',params:{watchPoint: this.WatchPointGUID}})
                         this.choosedTVboard.push(0)
                     }else {
+                        this.$message.closeAll()
                         this.$message.error('请选择监控点！')
                     }
               
@@ -165,6 +167,7 @@
                         // this.$router.push({name:'realTimeStatusPage',params:{WorkShopGUID: this.WorkShopGUID}})
                         this.choosedTVboard.push(1)
                     }else {
+                        this.$message.closeAll()
                         this.$message.error('请选择车间！')
                     }
                   
@@ -215,18 +218,19 @@
             //跳转到多TV轮播页
             gotoSwiperPages() {
                 if(this.choosedTVboard.length != 0) {
-                    this.$router.push({name:'SwiperPages',params:{watchPoint:this.WatchPointGUID,WorkShopGUID:this.WorkShopGUID,choosedTVboardList:JSON.stringify(this.choosedTVboard)}})
+                    this.$router.push({name:'SwiperPages',params:{watchPoint:this.WatchPointGUID,WorkShopGUID:this.WorkShopGUID,choosedTVboardList:JSON.stringify(this.choosedTVboard),switchTime:this.switchTime}})
                     this.choosedTVboard = []
                     this.showPoint =false
                     this.showWorkSpace = false
                     this.showDD = false
                     this.showEE = false
                 }else {
+                    this.$message.closeAll()
                     this.$message.error('请选择看板')
                 }
             }
         },
-        activated() {
+        mounted() {
             this.$refs.lj.focus()
             // console.log(this.isValidIP('192.168.145.13l'))
             localStorage.setItem('NowPage',this.$route.path)            
@@ -256,6 +260,14 @@
                 this.watchWorks = JSON.parse(res.data)
                 console.log(this.watchWorks)
             })
+            //获取看板切换时间
+            this.$axios.post('/JLDPWebApi/api/MCorder/GetKANBANSWITCHTIME').then(res => {
+                console.log('切换时间',res)
+                this.switchTime = res.data*1000
+                this.$forceUpdate() //必须要加这个话，不然重新获取时间后轮播间隔并没改变
+                console.log('切换时间毫秒',this.switchTime)
+
+            })
         },
         watch: {
             'URL'() {
@@ -265,6 +277,7 @@
                 localStorage.setItem('IP',this.URL)
                 localStorage["host"] = "http://"+this.URL
                 if(!this.isValidIP(this.URL)) {
+                    this.$message.closeAll()
                     this.$message.error('IP地址不合法')
                     // console.log(this.isValidIP(this.URL))
                 }

@@ -29,12 +29,12 @@
                                 <div class="bd"></div>
                                 <div class="bd"></div>
                                 <div class="shouldUp">
-                                    <span>应上岗工位</span>
+                                    <span>工位数</span>
                                     <div class="totalMember" :style="[item.应上岗工位数==0?{'width':0}:item.应上岗工位数<item.已上岗工位数?{'width': `${item.应上岗工位数 / item.已上岗工位数 * 3.04}rem`}:{'width':'3.04rem'}]"></div>
                                     <span>{{item.应上岗工位数}}个</span>
                                 </div>
                                 <div class="haveUp">
-                                    <span>已上岗工位</span>
+                                    <span>上岗数</span>
                                     <div class="comeMember" :style="[item.已上岗工位数==0?{'width':0}:item.应上岗工位数>=item.已上岗工位数?{'width': `${item.已上岗工位数 / item.应上岗工位数 * 3.04}rem`}:{'width':'3.04rem'}]"></div>
                                     <span>{{item.已上岗工位数}}个</span>
                                 </div>
@@ -150,7 +150,7 @@ import { setTimeout, setInterval } from 'timers';
             PositionStatusPages() {
                 const PositionStatusPages = []
                 this.positionStatus.forEach((item, index) => {
-                    const page = Math.floor(index/3)
+                    const page = Math.floor(index/6)
                     if(!PositionStatusPages[page]) {
                         PositionStatusPages[page] = []
                     }
@@ -519,7 +519,7 @@ import { setTimeout, setInterval } from 'timers';
                 })
             },
         },
-        activated() {
+        mounted() {
             localStorage.setItem('NowPage',this.$route.path)
             // console.log(this.$route.path)
             const that = this
@@ -644,7 +644,9 @@ import { setTimeout, setInterval } from 'timers';
                             var swiperB = new Swiper('.swiper-containerB',{
                                 loop: false,
                                 autoplay: true,
-                                delay: 15000,
+                                autoplay: {
+                                    delay: 15000
+                                },
                                 observer:true,
                                 observeParents:true
                             })
@@ -795,7 +797,9 @@ import { setTimeout, setInterval } from 'timers';
                             var swiperB = new Swiper('.swiper-containerB',{
                                 loop: false,
                                 autoplay: true,
-                                delay: 15000,
+                                autoplay: {
+                                    delay: 15000
+                                },
                                 observer:true,
                                 observeParents:true
                             })

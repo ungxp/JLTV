@@ -21,7 +21,7 @@ export default new Router({
     },
     {
       name: 'SwiperPages',
-      path: '/SwiperPages/:watchPoint/:WorkShopGUID/:choosedTVboardList',
+      path: '/SwiperPages/:watchPoint/:WorkShopGUID/:choosedTVboardList/:switchTime',
       component: SwiperPages
     },
     {

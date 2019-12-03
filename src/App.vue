@@ -1,8 +1,7 @@
 <template>
   <div id="app">
-    <keep-alive exclude="ChassisPage">
+    
       <router-view/>
-    </keep-alive>
   </div>
 </template>
 

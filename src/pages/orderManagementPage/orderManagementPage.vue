@@ -56,7 +56,7 @@
                     <span>订单号</span>
                     <span>产品编号</span>
                     <span>订单数量</span>
-                    <span>实际完成</span>
+                    <span>上线数量</span>
                     <span>差距</span>
                     <span>计划完成日期</span>
                 </div>
@@ -97,7 +97,8 @@ import Swiper from 'swiper'
                 //swiperD
                 swiperD: '',
                 //swiperE
-                swiperE: ''
+                swiperE: '',
+                timer:''
             }
         },
         computed: {
@@ -127,18 +128,22 @@ import Swiper from 'swiper'
                 return UnfinishedOrdersPages
             },
         },
-        activated() { 
-            localStorage.setItem('NowPage',this.$route.path)
-            const that = this
+        methods:{
             //获取今日生产订单跟踪数据
-            this.$axios.post('/JLDPWebApi/api/MCorder/GetTodayorder').then(res => {
-                this.$message.closeAll()
+            GetTodayorder() {
+                this.$axios.post('/JLDPWebApi/api/MCorder/GetTodayorder').then(res => {
+                    this.$message.closeAll()
                     console.log('今日生产订单跟踪',res.data)
+                    this.orderTrackList = []
                     this.orderTrackList = res.data
+                    console.log('orderTrackList',this.orderTrackList)
+                    this.$forceUpdate()
                     this.$nextTick(() => {
                         if(this.swiperD) {
                             this.swiperD.update(false)   
-                        }else if(this.orderTrackListPages.length>=2){
+                            this.swiperD.autoplay.stop()
+                            this.swiperD.autoplay.start()
+                        }else {
                             var swiperD = new Swiper('.swiper-containerD',{
                                 loop: false,
                                 autoplay: true,
@@ -148,8 +153,7 @@ import Swiper from 'swiper'
                                 observer:true,
                                 observeParents:true
                             })
-                            this.swiperD = swiperD
-                            
+                            this.swiperD = swiperD 
                             console.log(this.swiperD)
                         }
                     })   
@@ -167,91 +171,49 @@ import Swiper from 'swiper'
                         })     
                     }
                 })
+            },
             //获取未完成订单数据
-            this.$axios.post('/JLDPWebApi/Api/Mcorder/GetUnfinishedOrders').then(res => {
-                this.$message.closeAll()
-                this.UnfinishedOrders = res.data
-                this.$nextTick(() => {
-                    if(this.swiperE) {
-                        this.swiperE.update(false)
-                    }else if(this.UnfinishedOrdersPages.length>=2){
-                        var swiperE = new Swiper('.swiper-containerE',{
-                            loop: false,
-                            autoplay: true,
-                            autoplay: {
-                                delay: 15000
-                            },
-                            // direction: 'vertical',
-                            observer:true,
-                            observeParents:true
-                        })
-                        this.swiperE = swiperE
-                        console.log(this.swiperE)
-                    }
-                })
-            })
-            setInterval(() => {
-                this.$axios.post('/JLDPWebApi/api/MCorder/GetTodayorder').then(res => {
-                    this.$message.closeAll()
-                    this.orderTrackList = JSON.parse(res.data)
-                    this.$nextTick(() => {
-                        if(this.swiperD) {
-                            console.log(this.swiperD)
-                            this.swiperD.update(false) 
-                            this.$forceUpdate()
-                        }else if(this.orderTrackListPages.length>=2){
-                            var swiperD = new Swiper('.swiper-containerD',{
-                                loop: false,
-                                autoplay: true,
-                                autoplay: {
-                                    delay: 15000
-                                },
-                                observer:true,
-                                observeParents:true
-                            })
-                            this.swiperD = swiperD
-                        }
-                        // console.log(this.swiperD)
-                    })
-                }).catch((error) => {
-                    // console.log(error.message)
-                    if(error.message && error.message == 'Network Error') {
-                        this.$message.closeAll()
-                        this.$message.error('请求已超时')             
-                    }else if (error.response && error.response.data == '网络已断开' && error.response.status == 502) {
-                        this.$message.closeAll()
-                        this.$message({
-                            message: '服务已断开',
-                            type: 'error',
-                            duration: 0
-                        })       
-                    }
-                })
+            GetUnfinishedOrders() {
                 this.$axios.post('/JLDPWebApi/Api/Mcorder/GetUnfinishedOrders').then(res => {
                     this.$message.closeAll()
+                    this.UnfinishedOrders = []
                     this.UnfinishedOrders = res.data
+                    this.$forceUpdate()
                     this.$nextTick(() => {
                         if(this.swiperE) {
-                            console.log(this.swiperE)                            
                             this.swiperE.update(false)
-                            this.$forceUpdate()
-                        }else if(this.UnfinishedOrdersPages.length>=2){
+                            this.swiperE.autoplay.stop()
+                            this.swiperE.autoplay.start()
+                        }else {
                             var swiperE = new Swiper('.swiper-containerE',{
                                 loop: false,
                                 autoplay: true,
                                 autoplay: {
                                     delay: 15000
                                 },
-                                direction: 'vertical',
                                 observer:true,
                                 observeParents:true
                             })
                             this.swiperE = swiperE
+                            console.log(this.swiperE)
                         }
-                        // console.log(this.swiperE)
                     })
                 })
+            }
+        },
+        mounted() { 
+            localStorage.setItem('NowPage',this.$route.path)
+            this.GetTodayorder()
+            this.GetUnfinishedOrders()
+            this.timer = setInterval(() => {
+                this.GetTodayorder()
+                this.GetUnfinishedOrders()
             },60000)
+        },
+        beforeDestroy() {
+            if(this.timer) {
+                clearInterval(this.timer)
+            }
         }
     }
 </script>
